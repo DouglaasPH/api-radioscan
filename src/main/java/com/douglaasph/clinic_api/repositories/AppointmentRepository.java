@@ -3,6 +3,7 @@ package com.douglaasph.clinic_api.repositories;
 import com.douglaasph.clinic_api.controllers.dto.appointment.AllAvailablesAppointmentsResponseDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.AppointmentManagementAdminDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.PatientEmployeeAppointmentResponseDto;
 import com.douglaasph.clinic_api.models.entities.Appointment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +18,22 @@ import java.util.List;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    @Query("SELECT a FROM Appointment a WHERE a.patient.user.email = :email OR a.employee.user.email = :email")
-    List<Appointment> findByPatientOrEmployeeEmail(@Param("email") String email);
+    @Query("""
+        SELECT new com.douglaasph.clinic_api.controllers.dto.appointment.PatientEmployeeAppointmentResponseDto(
+            a.id,
+            a.appointmentStatus,
+            a.appointmentType,
+            eUser.name,
+            a.dateHour
+        )
+        FROM Appointment a
+        LEFT JOIN a.employee e
+        LEFT JOIN e.user eUser
+        LEFT JOIN a.patient p
+        LEFT JOIN p.user pUser
+        WHERE pUser.email = :email
+    """)
+    List<PatientEmployeeAppointmentResponseDto> findByPatientEmail(@Param("email") String email);
 
     List<Appointment> findByAppointmentStatusAndDateHourAfter(int appointmentStatus, LocalDateTime dateHour);
 

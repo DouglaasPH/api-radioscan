@@ -1,9 +1,6 @@
 package com.douglaasph.clinic_api.services;
 
-import com.douglaasph.clinic_api.controllers.dto.appointment.AllAvailablesAppointmentsResponseDto;
-import com.douglaasph.clinic_api.controllers.dto.appointment.AppointmentManagementAdminDto;
-import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
-import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.*;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.models.entities.*;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
@@ -45,13 +42,8 @@ public class AppointmentService {
     @Autowired
     private UserRepository userRepository;
 
-    // Business Rule: Admins can fetch all records, while patients and doctors can only fetch records linked to them.
-    public List<Appointment> findAll(String loggedEmail, boolean isAdmin) {
-        if (isAdmin) {
-            return appointmentRepository.findAll();
-        } else {
-            return appointmentRepository.findByPatientOrEmployeeEmail(loggedEmail);
-        }
+    public List<PatientEmployeeAppointmentResponseDto> findByPatientEmail(String loggedEmail, boolean isAdmin) {
+            return appointmentRepository.findByPatientEmail(loggedEmail);
     }
 
     public Page<AllAvailablesAppointmentsResponseDto> findAllAvailable(LocalDate date, AppointmentType appointmentType, Integer page) {
@@ -74,11 +66,10 @@ public class AppointmentService {
     }
 
     @Transactional
-    public Appointment book(Long appointmentId, String email) throws AppointmentConflictException {
-        Long loggedPatientId = userRepository.findByEmail(email)
+    public Appointment book(Long appointmentId, Authentication authentication) throws AppointmentConflictException {
+        Patient patient = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException(("user not found")))
-                .getPatient()
-                .getId();
+                .getPatient();
 
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
@@ -90,14 +81,6 @@ public class AppointmentService {
             throw new AppointmentConflictException("This time slot is not available for scheduling.");
         }
 
-        if (appointment.getType() == AppointmentType.REPORT_REVIEW) {
-            boolean hasProcessedReport = xRayReportRepository.existsByAppointment_Patient_IdAndProcessingStatusNot(loggedPatientId, ProcessingStatus.VALIDATED_BY_DOCTOR.getCode());
-            if (!hasProcessedReport) {
-                throw new AppointmentConflictException("It is not possible to schedule a follow-up appointment without an X-ray exam in the system.");
-            }
-        }
-
-        Patient patient = patientRepository.getReferenceById(loggedPatientId);
         appointment.setPatient(patient);
         appointment.setStatus(AppointmentStatus.SCHEDULED);
 

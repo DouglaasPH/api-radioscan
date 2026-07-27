@@ -1,9 +1,6 @@
 package com.douglaasph.clinic_api.controllers;
 
-import com.douglaasph.clinic_api.controllers.dto.appointment.AllAvailablesAppointmentsResponseDto;
-import com.douglaasph.clinic_api.controllers.dto.appointment.AppointmentManagementAdminDto;
-import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
-import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.*;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.models.entities.Appointment;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
@@ -67,15 +64,14 @@ public class AppointmentController {
     }
 
     // AUTHORIZATION: ANY ROLE (authenticated only)
-    // Business Rule: Admins can fetch all records, while patients and employees can only fetch records linked to them.
     @Operation(summary = "Find all appointments linked to the user ")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "All inserted appointments")
     })
     @GetMapping
-    public ResponseEntity<List<Appointment>> findAll(Authentication authentication) {
+    public ResponseEntity<List<PatientEmployeeAppointmentResponseDto>> findAll(Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ROLE_ADMIN"));
-        return ResponseEntity.ok().body(appointmentService.findAll(authentication.getName(), isAdmin));
+        return ResponseEntity.ok().body(appointmentService.findByPatientEmail(authentication.getName(), isAdmin));
     }
 
     // AUTHORIZATION: PATIENT
@@ -86,7 +82,7 @@ public class AppointmentController {
     })
     @PutMapping("/{appointmentId}/book")
     public ResponseEntity<Appointment> book(@PathVariable Long appointmentId, Authentication authentication) throws AppointmentConflictException {
-        Appointment response = appointmentService.book(appointmentId, authentication.getName());
+        Appointment response = appointmentService.book(appointmentId, authentication);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.getId()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
