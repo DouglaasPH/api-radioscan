@@ -1,11 +1,13 @@
 package com.douglaasph.clinic_api.controllers;
 
-import com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.AllAvailablesAppointmentsResponseDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.AppointmentManagementAdminDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.models.entities.Appointment;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
+import com.douglaasph.clinic_api.models.entities.enums.AppointmentType;
 import com.douglaasph.clinic_api.services.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +17,7 @@ import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,8 +56,14 @@ public class AppointmentController {
             @ApiResponse(responseCode = "201", description = "All inserted appointments")
     })
     @GetMapping("/available")
-    public ResponseEntity<List<Appointment>> findAllAvailable() {
-        return ResponseEntity.ok().body(appointmentService.findAllAvailable());
+    public ResponseEntity<Page<AllAvailablesAppointmentsResponseDto>> findAllAvailable(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDate date,
+            @RequestParam(required = false) AppointmentType appointmentType,
+            @RequestParam(defaultValue = "0") Integer page
+    ) {
+        return ResponseEntity.ok().body(appointmentService.findAllAvailable(date, appointmentType, page));
     }
 
     // AUTHORIZATION: ANY ROLE (authenticated only)

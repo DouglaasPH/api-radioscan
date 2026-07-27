@@ -1,12 +1,10 @@
 package com.douglaasph.clinic_api.repositories;
 
-import com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.AllAvailablesAppointmentsResponseDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.AppointmentManagementAdminDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
 import com.douglaasph.clinic_api.models.entities.Appointment;
-import com.douglaasph.clinic_api.models.entities.User;
-import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +23,30 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByAppointmentStatusAndDateHourAfter(int appointmentStatus, LocalDateTime dateHour);
 
     @Query("""
-        SELECT new com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto(
+        SELECT new com.douglaasph.clinic_api.controllers.dto.appointment.AllAvailablesAppointmentsResponseDto(
+            a.id,
+            a.dateHour,
+            a.appointmentType,
+            eUser.name
+        )
+        FROM Appointment a
+        LEFT JOIN a.employee e
+        LEFT JOIN e.user eUser
+        LEFT JOIN a.patient p
+        LEFT JOIN p.user pUser
+        WHERE (a.appointmentStatus = 1)
+            AND (:appointmentType IS NULL OR a.appointmentType = :appointmentType)
+            AND (a.dateHour BETWEEN :startDate AND :endDate)
+    """)
+    Page<AllAvailablesAppointmentsResponseDto> findAllAvailablesAppointments(
+            @Param("appointmentType") Integer appointmentType,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT new com.douglaasph.clinic_api.controllers.dto.appointment.AppointmentManagementAdminDto(
             a.id,
             a.dateHour,
             a.appointmentStatus,

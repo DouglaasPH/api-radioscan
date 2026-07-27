@@ -1,6 +1,7 @@
 package com.douglaasph.clinic_api.services;
 
-import com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.AllAvailablesAppointmentsResponseDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.AppointmentManagementAdminDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
@@ -12,7 +13,6 @@ import com.douglaasph.clinic_api.repositories.*;
 import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,11 +54,10 @@ public class AppointmentService {
         }
     }
 
-    public List<Appointment> findAllAvailable() {
-        return appointmentRepository.findByAppointmentStatusAndDateHourAfter(1, LocalDateTime.now());
+    public Page<AllAvailablesAppointmentsResponseDto> findAllAvailable(LocalDate date, AppointmentType appointmentType, Integer page) {
+        PageRequest pageable = PageRequest.of(page, 4);
+        return appointmentRepository.findAllAvailablesAppointments(appointmentType.getCode(), date.atStartOfDay(), date.atTime(LocalTime.MAX), pageable);
     }
-
-
 
     @Transactional
     public Appointment insert(CreateAppointmentDto dto) throws BadRequestException {
@@ -157,9 +156,6 @@ public class AppointmentService {
     public DashboardMetricsForEmployeeResponseDto metricsForEmployeeDashboard(Authentication authentication) {
         Long userId = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", authentication.getName())).getId();
-
-        System.out.println("NAMEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-        System.out.println(userId);
 
         return appointmentRepository.getDailyMetrics(
                 userId,

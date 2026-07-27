@@ -1,4 +1,4 @@
-package com.douglaasph.clinic_api.controllers.dto.admin;
+package com.douglaasph.clinic_api.controllers.dto.appointment;
 
 import java.time.LocalDateTime;
 
