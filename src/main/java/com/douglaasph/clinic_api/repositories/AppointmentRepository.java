@@ -1,6 +1,7 @@
 package com.douglaasph.clinic_api.repositories;
 
 import com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
 import com.douglaasph.clinic_api.models.entities.Appointment;
 import com.douglaasph.clinic_api.models.entities.User;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
@@ -38,9 +39,27 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         LEFT JOIN a.patient p
         LEFT JOIN p.user pUser
         WHERE (:appointmentStatus IS NULL OR a.appointmentStatus = :appointmentStatus)
+            AND (:employeeName IS NULL OR eUser.name = :employeeName)
     """)
     Page<AppointmentManagementAdminDto> findAllAppointmentsManagement(
             @Param("appointmentStatus") Integer appointmentStatus,
+            @Param("employeeName") String employeeName,
             Pageable pageable
+    );
+
+    @Query("""
+        SELECT new com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto(
+            COUNT(a),
+            SUM(CASE WHEN a.appointmentStatus = 4 THEN 1 ELSE 0 END),
+            SUM(CASE WHEN a.appointmentStatus = 1 THEN 1 ELSE 0 END)
+        )
+        FROM Appointment a
+        WHERE (a.dateHour BETWEEN :startDate AND :endDate)
+            AND (a.employee.id = :userId)
+    """)
+    DashboardMetricsForEmployeeResponseDto getDailyMetrics(
+            @Param("userId") Long userId,
+            LocalDateTime startDate,
+            LocalDateTime endDate
     );
 }

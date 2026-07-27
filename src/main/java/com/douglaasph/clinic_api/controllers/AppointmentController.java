@@ -2,6 +2,7 @@ package com.douglaasph.clinic_api.controllers;
 
 import com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
+import com.douglaasph.clinic_api.controllers.dto.appointment.DashboardMetricsForEmployeeResponseDto;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.models.entities.Appointment;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
@@ -108,9 +109,9 @@ public class AppointmentController {
         return ResponseEntity.ok(Map.of("uploadUrl", uploadUrl));
     }
 
-    // AUTHORIZATION: ONLY ADMIN
+    // AUTHORIZATION: ONLY ADMIN AND EMPLOYEES
     @Operation(
-            summary = "List appointments for management for admin",
+            summary = "List appointments for management for admin and employees",
             description = "Retrieves a paginated list of clinic appointments with optional filters by name and job position."
     )
     @ApiResponses(value = {
@@ -131,11 +132,44 @@ public class AppointmentController {
                     description = "Internal server error"
             )
     })
-    @GetMapping("management/admin")
+    @GetMapping("management")
     public ResponseEntity<Page<AppointmentManagementAdminDto>> appointmentsManagementWithPagination(
             @RequestParam(required = false) AppointmentStatus status,
+            @RequestParam(required = false) String employeeName,
             @RequestParam(defaultValue = "0") Integer page
     ) {
-        return ResponseEntity.ok(this.appointmentService.findAllAppointmentsForManagementWithPagination(status, page));
+        return ResponseEntity.ok(this.appointmentService.findAllAppointmentsForManagementWithPagination(status, employeeName, page));
+    }
+
+    // AUTHORIZATION: ONLY EMPLOYEES
+    @Operation(
+            summary = "Retrieve employee dashboard metrics",
+            description = """
+                    Returns the dashboard metrics for employees including: 
+                    Total appointments scheduled for the current day, 
+                    Total completed appointments for the current day, 
+                    Total pending appointments for the current day
+                    """)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Employee dashboard metrics retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Missing or invalid JWT token"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - User lacks required EMPLOYEE authority"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error while retrieving dashboard metrics"
+            )
+    })
+    @GetMapping("metrics")
+    public ResponseEntity<DashboardMetricsForEmployeeResponseDto> getMetricsForEmployeees( Authentication authentication) {
+        return ResponseEntity.ok(this.appointmentService.metricsForEmployeeDashboard(authentication));
     }
 }
