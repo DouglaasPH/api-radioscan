@@ -1,6 +1,5 @@
 package com.douglaasph.clinic_api.config.security;
 
-import com.douglaasph.clinic_api.exceptions.TokenException;
 import com.douglaasph.clinic_api.services.JWTService;
 import com.douglaasph.clinic_api.services.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;

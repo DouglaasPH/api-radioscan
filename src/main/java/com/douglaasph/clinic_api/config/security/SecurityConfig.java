@@ -52,9 +52,9 @@ public class SecurityConfig {
 
                         // private routes that require authentication and role-based authorization
                         .requestMatchers(HttpMethod.GET, "/admin/metrics/dashboard").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/admin/metrics/employees").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/admin/management/employees").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/admin/management/appointments").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/employee/metrics/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/employee/management/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/appointment/management/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/employee/register").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/x-ray/{appointmentId}/review").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/x-ray").hasRole("PATIENT")

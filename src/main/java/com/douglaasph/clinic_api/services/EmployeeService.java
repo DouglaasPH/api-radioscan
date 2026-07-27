@@ -1,5 +1,6 @@
 package com.douglaasph.clinic_api.services;
 
+import com.douglaasph.clinic_api.controllers.dto.employee.EmployeesManagementMetricsDto;
 import com.douglaasph.clinic_api.controllers.dto.employee.RegisterEmployeeDto;
 import com.douglaasph.clinic_api.models.entities.Employee;
 import com.douglaasph.clinic_api.models.entities.User;
@@ -13,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -57,5 +60,19 @@ public class EmployeeService {
 
     public Employee findById(Long id) {
         return employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee", "id", id));
+    }
+
+    public EmployeesManagementMetricsDto employeesManagementMetrics() {
+        Integer numberOfEmployees = this.employeeRepository.findAll().size();
+        Integer numberOfDoctors = this.employeeRepository.findByOptionalFilters(null, 2).size();
+        Integer numberOfTechnicians = this.employeeRepository.findByOptionalFilters(null, 1).size();
+
+        return new EmployeesManagementMetricsDto(numberOfEmployees, numberOfDoctors, numberOfTechnicians);
+    }
+
+    public Page<User> findAllEmployeesForManagementWithPagination(String name, Position position, int page) {
+        PageRequest pageable = PageRequest.of(page, 4);
+        Integer positionCode = (position == null) ? null : position.getCode();
+        return userRepository.findEmployeesWithFilters(name, positionCode, pageable);
     }
 }

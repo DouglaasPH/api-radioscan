@@ -1,8 +1,10 @@
 package com.douglaasph.clinic_api.controllers;
 
+import com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.models.entities.Appointment;
+import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
 import com.douglaasph.clinic_api.services.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -103,5 +106,36 @@ public class AppointmentController {
     ) throws AppointmentConflictException {
         String uploadUrl = appointmentService.startExamCapture(appointmentId, authentication.getName());
         return ResponseEntity.ok(Map.of("uploadUrl", uploadUrl));
+    }
+
+    // AUTHORIZATION: ONLY ADMIN
+    @Operation(
+            summary = "List appointments for management for admin",
+            description = "Retrieves a paginated list of clinic appointments with optional filters by name and job position."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Paginated list of appointments retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - Missing or invalid JWT token"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - User lacks required ADMIN authority"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error"
+            )
+    })
+    @GetMapping("management/admin")
+    public ResponseEntity<Page<AppointmentManagementAdminDto>> appointmentsManagementWithPagination(
+            @RequestParam(required = false) AppointmentStatus status,
+            @RequestParam(defaultValue = "0") Integer page
+    ) {
+        return ResponseEntity.ok(this.appointmentService.findAllAppointmentsForManagementWithPagination(status, page));
     }
 }

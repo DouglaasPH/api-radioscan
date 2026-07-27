@@ -1,5 +1,6 @@
 package com.douglaasph.clinic_api.services;
 
+import com.douglaasph.clinic_api.controllers.dto.admin.AppointmentManagementAdminDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.models.entities.*;
@@ -11,12 +12,13 @@ import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class AppointmentService {
@@ -139,5 +141,11 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
 
         return xRayReportService.createReportAndGenerateUploadUrl(appointment);
+    }
+
+    public Page<AppointmentManagementAdminDto> findAllAppointmentsForManagementWithPagination(AppointmentStatus status, Integer page) {
+        PageRequest pageable = PageRequest.of(page, 4);
+        Integer statusCode = (status == null) ? null : status.getCode();
+        return appointmentRepository.findAllAppointmentsManagement(statusCode, pageable);
     }
 }
