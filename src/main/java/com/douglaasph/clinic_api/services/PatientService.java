@@ -62,7 +62,7 @@ public class PatientService {
                     dto.patient().phone(),
                     savedUser);
 
-            Patient savedPatient = patientRepository.save(patient);
+            patientRepository.save(patient);
 
             String accessToken = jwtService.generateToken(user.getEmail());
             RefreshToken refreshToken = refreshTokenService.insert(user.getEmail());

@@ -18,19 +18,23 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
+@ExtendWith(MockitoExtension.class)
 class PatientServiceTest {
     @Mock
     private UserRepository userRepository;
@@ -39,7 +43,7 @@ class PatientServiceTest {
     private PatientRepository patientRepository;
 
     @Mock
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private PasswordEncoder passwordEncoder;
 
     @Mock
     private RefreshTokenService refreshTokenService;
@@ -63,20 +67,24 @@ class PatientServiceTest {
         PatientDto patientDto = new PatientDto("12345678912", "81900000000");
         RegisterPatientDto registerPatientDto = new RegisterPatientDto(userDto, patientDto);
 
-        Mockito.doReturn("mocked-encode").when(encoder).encode("1234");
-
         User user = new User(null, userDto.name(), userDto.email(), "mocked-encode", Roles.PATIENT);
         Mockito.when(userRepository.save(any(User.class))).thenReturn(user);
 
         Patient patient = new Patient(null, patientDto.cpf(), patientDto.phone(), user);
         Mockito.when(patientRepository.save(any(Patient.class))).thenReturn(patient);
 
-        Patient response = patientService.register(registerPatientDto);
+        Mockito.when(jwtService.generateToken("example@gmail.com")).thenReturn("mocked-access-token");
+
+        RefreshToken mockRefreshToken = new RefreshToken();
+        mockRefreshToken.setToken("mocked-refresh-token");
+        Mockito.when(refreshTokenService.insert(anyString())).thenReturn(mockRefreshToken);
+
+        LoginResponseDto response = patientService.register(registerPatientDto);
 
         assertNotNull(response);
-        assertEquals(patient.getCpf(), response.getCpf());
-        assertEquals(patient.getPhone(), response.getPhone());
-        assertEquals(patient.getUser().getEmail(), response.getUser().getEmail());
+        assertTrue(response.registered());
+        assertEquals("mocked-access-token", response.accessToken());
+        assertEquals("mocked-refresh-token", response.refreshToken());
 
         Mockito.verify(userRepository, Mockito.times(1)).save(any(User.class));
         Mockito.verify(patientRepository, Mockito.times(1)).save(any(Patient.class));
@@ -88,8 +96,6 @@ class PatientServiceTest {
         UserDto userDto = new UserDto("Douglas Phelipe", "example@gmail.com", "1234");
         PatientDto patientDto = new PatientDto("12345678912", "81900000000");
         RegisterPatientDto registerPatientDto = new RegisterPatientDto(userDto, patientDto);
-
-        Mockito.doReturn("mocked-encode").when(encoder).encode("1234");
 
         Mockito.when(userRepository.save(any(User.class)))
                 .thenThrow(new DataIntegrityViolationException("Duplicate key"));
@@ -119,7 +125,7 @@ class PatientServiceTest {
         GoogleIdToken idTokenMock = Mockito.mock(GoogleIdToken.class);
         GoogleIdToken.Payload payloadMock = Mockito.mock(GoogleIdToken.Payload.class);
 
-        Mockito.when(verifierMock.verify(Mockito.anyString())).thenReturn(idTokenMock);
+        Mockito.when(verifierMock.verify(anyString())).thenReturn(idTokenMock);
         Mockito.when(idTokenMock.getPayload()).thenReturn(payloadMock);
         Mockito.when(payloadMock.getEmail()).thenReturn("patient@gmail.com");
 
@@ -157,7 +163,7 @@ class PatientServiceTest {
         );
 
         GoogleIdTokenVerifier verifierMock = Mockito.mock(GoogleIdTokenVerifier.class);
-        Mockito.when(verifierMock.verify(Mockito.anyString())).thenReturn(null);
+        Mockito.when(verifierMock.verify(anyString())).thenReturn(null);
 
         Mockito.doReturn(verifierMock).when(authService).getGoogleIdTokenVerifier();
 
@@ -183,7 +189,7 @@ class PatientServiceTest {
         GoogleIdToken idTokenMock = Mockito.mock(GoogleIdToken.class);
         GoogleIdToken.Payload payloadMock = Mockito.mock(GoogleIdToken.Payload.class);
 
-        Mockito.when(verifierMock.verify(Mockito.anyString())).thenReturn(idTokenMock);
+        Mockito.when(verifierMock.verify(anyString())).thenReturn(idTokenMock);
         Mockito.when(idTokenMock.getPayload()).thenReturn(payloadMock);
         Mockito.when(payloadMock.getEmail()).thenReturn("patient@gmail.com");
 

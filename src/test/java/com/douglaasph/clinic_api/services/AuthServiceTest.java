@@ -20,7 +20,6 @@ import org.springframework.security.core.Authentication;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -116,15 +115,12 @@ class AuthServiceTest {
         mockRefreshToken.setToken("mocked-refresh-token");
         Mockito.when(refreshTokenService.insert("patient@gmail.com")).thenReturn(mockRefreshToken);
 
-        Map<String, Object> result = authService.checkGoogleUser(dto);
+        LoginResponseDto result = authService.loginGoogle(dto);
 
         assertNotNull(result);
-        assertEquals(true, result.get("registered"));
-
-        LoginResponseDto authResponse = (LoginResponseDto) result.get("auth");
-        assertNotNull(authResponse);
-        assertEquals("mocked-access-token", authResponse.accessToken());
-        assertEquals("mocked-refresh-token", authResponse.refreshToken());
+        assertTrue(result.registered());
+        assertEquals("mocked-access-token", result.accessToken());
+        assertEquals("mocked-refresh-token", result.refreshToken());
 
         Mockito.verify(jwtService, Mockito.times(1)).generateToken("patient@gmail.com");
         Mockito.verify(refreshTokenService, Mockito.times(1)).insert("patient@gmail.com");
@@ -140,7 +136,7 @@ class AuthServiceTest {
 
         Mockito.doReturn(verifierMock).when(authService).getGoogleIdTokenVerifier();
 
-        assertThrows(TokenException.class, () -> authService.checkGoogleUser(dto));
+        assertThrows(TokenException.class, () -> authService.loginGoogle(dto));
 
         Mockito.verifyNoInteractions(userRepository);
         Mockito.verifyNoInteractions(jwtService);

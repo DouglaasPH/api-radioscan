@@ -50,6 +50,7 @@ class XRayReportServiceTest {
         AppointmentDetailsDto dto = appointmentDetails();
 
         XRayReport report = new XRayReport(100L,
+                null,
                 "exams/any-generated-uuid.png",
                 ProcessingStatus.PROCESSED_BY_IA.getCode(),
                 null,
@@ -195,7 +196,7 @@ class XRayReportServiceTest {
 
         Appointment appointment = new Appointment(1L, employee, patient, LocalDateTime.now(), AppointmentStatus.SCHEDULED, AppointmentType.REPORT_REVIEW);
 
-        XRayReport xRayReport = new XRayReport(1L, "mocked-s3-key", 3, null, null, false, appointment);
+        XRayReport xRayReport = new XRayReport(1L, null, "mocked-s3-key", 3, null, null, false, appointment);
 
         return new AppointmentDetailsDto(employee, patient, appointment, xRayReport);
     }

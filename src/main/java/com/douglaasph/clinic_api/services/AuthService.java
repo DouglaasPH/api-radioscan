@@ -75,7 +75,6 @@ public class AuthService implements UserDetailsService {
                 throw new TokenException("Google token is invalid or has expired.");
             }
 
-            Map<String, Object> result = new HashMap<>();
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
 

@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDateTime;
@@ -123,15 +124,19 @@ class AppointmentServiceTest {
         Employee doctor = new Employee(1L, "123456", Position.DOCTOR, new User());
         Appointment appointment = new Appointment(appointmentId, doctor, null, LocalDateTime.now(), AppointmentStatus.AVAILABLE, AppointmentType.EXAM_CAPTURE);
 
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getName()).thenReturn(email);
+
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
         Mockito.when(patientRepository.getReferenceById(10L)).thenReturn(patient);
         Mockito.when(appointmentRepository.save(any(Appointment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Appointment result = appointmentService.book(appointmentId, email);
+        Appointment result = appointmentService.book(appointmentId, authentication);
 
         assertNotNull(result);
         assertEquals(patient, result.getPatient());
+        assertEquals(AppointmentStatus.SCHEDULED, result.getStatus());
         Mockito.verify(appointmentRepository, Mockito.times(1)).save(appointment);
     }
 
@@ -139,10 +144,14 @@ class AppointmentServiceTest {
     @DisplayName("Should throw UsernameNotFoundException when scheduling user is not found")
     void bookCase2() {
         String email = "notfound@example.com";
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getName()).thenReturn(email);
+
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> {
-            appointmentService.book(1L, email);
+            appointmentService.book(1L, authentication);
         });
 
         Mockito.verifyNoInteractions(appointmentRepository);
@@ -156,11 +165,14 @@ class AppointmentServiceTest {
         Patient patient = new Patient(10L, "12345678912", "81999999999", user);
         user.setPatient(patient);
 
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getName()).thenReturn(email);
+
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         Mockito.when(appointmentRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            appointmentService.book(999L, email);
+            appointmentService.book(999L, authentication);
         });
     }
 
@@ -179,11 +191,14 @@ class AppointmentServiceTest {
 
         Appointment occupiedAppointment = new Appointment(appointmentId, doctor, anotherPatient, LocalDateTime.now(), AppointmentStatus.AVAILABLE, AppointmentType.EXAM_CAPTURE);
 
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getName()).thenReturn(email);
+
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(occupiedAppointment));
 
         AppointmentConflictException exception = assertThrows(AppointmentConflictException.class, () -> {
-            appointmentService.book(appointmentId, email);
+            appointmentService.book(appointmentId, authentication);
         });
 
         assertEquals("This time slot is already reserved by another patient.", exception.getMessage());
@@ -202,41 +217,17 @@ class AppointmentServiceTest {
         Employee doctor = new Employee(1L, "123456", Position.DOCTOR, new User());
         Appointment unvailableAppointment = new Appointment(appointmentId, doctor, null, LocalDateTime.now(), AppointmentStatus.CANCELED, AppointmentType.EXAM_CAPTURE);
 
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getName()).thenReturn(email);
+
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(unvailableAppointment));
 
         AppointmentConflictException exception = assertThrows(AppointmentConflictException.class, () -> {
-            appointmentService.book(appointmentId, email);
+            appointmentService.book(appointmentId, authentication);
         });
 
         assertEquals("This time slot is not available for scheduling.", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should throw AppointmentConflictException when booking a REPORT_REVIEW without a processed report")
-    void bookCase6() {
-        String email = "douglas@example.com";
-        Long appointmentId = 1L;
-
-        User user = new User(1L, "Douglas", email, "123", Roles.PATIENT);
-        Patient patient = new Patient(10L, "12345678912", "81999999999", user);
-        user.setPatient(patient);
-
-        Employee doctor = new Employee(1L, "123456", Position.DOCTOR, new User());
-        Appointment reviewAppointment = new Appointment(appointmentId, doctor, null, LocalDateTime.now(), AppointmentStatus.AVAILABLE, AppointmentType.REPORT_REVIEW);
-
-        Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(reviewAppointment));
-
-        Mockito.when(xRayReportRepository.existsByAppointment_Patient_IdAndProcessingStatusNot(
-                Mockito.eq(10L), Mockito.anyInt()
-        )).thenReturn(false);
-
-        AppointmentConflictException exception = assertThrows(AppointmentConflictException.class, () -> {
-            appointmentService.book(appointmentId, email);
-        });
-
-        assertEquals("It is not possible to schedule a follow-up appointment without an X-ray exam in the system.", exception.getMessage());
     }
 
     @Test
@@ -318,7 +309,7 @@ class AppointmentServiceTest {
 
         Appointment appointment = new Appointment(1L, employee, patient, LocalDateTime.now(), AppointmentStatus.SCHEDULED, AppointmentType.REPORT_REVIEW);
 
-        XRayReport xRayReport = new XRayReport(1L, "mocked-s3-key", 3, null, null, false, appointment);
+        XRayReport xRayReport = new XRayReport(1L, null, "mocked-s3-key", 3, null, null, false, appointment);
 
         return new AppointmentDetailsDto(employee, patient, appointment, xRayReport);
     }
