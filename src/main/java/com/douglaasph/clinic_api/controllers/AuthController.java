@@ -3,8 +3,6 @@ package com.douglaasph.clinic_api.controllers;
 import com.douglaasph.clinic_api.controllers.dto.auth.GoogleAuthDto;
 import com.douglaasph.clinic_api.controllers.dto.auth.LoginResponseDto;
 import com.douglaasph.clinic_api.controllers.dto.auth.LoginUserDto;
-import com.douglaasph.clinic_api.models.entities.Patient;
-import com.douglaasph.clinic_api.models.entities.User;
 import com.douglaasph.clinic_api.services.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,10 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
