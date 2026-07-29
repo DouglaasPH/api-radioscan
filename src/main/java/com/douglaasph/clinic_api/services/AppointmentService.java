@@ -2,17 +2,17 @@ package com.douglaasph.clinic_api.services;
 
 import com.douglaasph.clinic_api.controllers.dto.appointment.*;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
+import com.douglaasph.clinic_api.exceptions.BusinessRuleException;
 import com.douglaasph.clinic_api.models.entities.*;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentType;
-import com.douglaasph.clinic_api.models.entities.enums.ProcessingStatus;
 import com.douglaasph.clinic_api.repositories.*;
 import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -26,12 +26,6 @@ import java.util.List;
 public class AppointmentService {
     @Autowired
     private AppointmentRepository appointmentRepository;
-
-    @Autowired
-    private XRayReportRepository xRayReportRepository;
-
-    @Autowired
-    private PatientRepository patientRepository;
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -52,13 +46,13 @@ public class AppointmentService {
     }
 
     @Transactional
-    public Appointment insert(CreateAppointmentDto dto) throws BadRequestException {
+    public Appointment insert(CreateAppointmentDto dto) throws IllegalArgumentException {
         Employee employee = employeeRepository.findById(dto.employee_id()).orElseThrow(() -> new ResourceNotFoundException("Employee", "id", dto.employee_id()));
 
         // TECHNICAL CODE IS 1 === EXAM_CAPTURE CODE IS 1
         // DOCTOR CODE IS 2 === REPORT_REVIEW CODE IS 2
         if (dto.type().getCode() != employee.getPosition().getCode()) {
-            throw new BadRequestException("Employee's position incompatible with the type of inquiry.");
+            throw new BusinessRuleException("Employee's position incompatible with the type of inquiry.");
         }
 
         Appointment appointment = new Appointment(null, employee, null, dto.dateHour(), AppointmentStatus.AVAILABLE, dto.type());
@@ -95,7 +89,7 @@ public class AppointmentService {
 
         LocalDateTime now = LocalDateTime.now();
         if (now.isAfter(appointment.getDateHour().minusHours(24))) {
-            throw new IllegalArgumentException("The appointment can only be cancelled with 24 hours' notice.");
+            throw new BusinessRuleException("The appointment can only be cancelled with 24 hours' notice.");
         }
 
         appointment.setStatus(AppointmentStatus.CANCELED);
@@ -108,7 +102,7 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         if (user.getEmployee() == null) {
-            throw new AppointmentConflictException("Logged user is not registered as an employee.");
+            throw new AccessDeniedException("Logged user is not registered as an employee.");
         }
 
         Long loggedEmployeeId = user.getEmployee().getId();
@@ -117,11 +111,11 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
         if (appointment.getEmployee() == null || !appointment.getEmployee().getId().equals(loggedEmployeeId)) {
-            throw new AppointmentConflictException("This appointment is not assigned to you.");
+            throw new AccessDeniedException("This appointment is not assigned to you.");
         }
 
         if (appointment.getType() != AppointmentType.EXAM_CAPTURE) {
-            throw new AppointmentConflictException("This appointment scheduling is not intended for the collection of test samples.");
+            throw new BusinessRuleException("This appointment scheduling is not intended for the collection of test samples.");
         }
 
         if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {

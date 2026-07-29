@@ -1,8 +1,6 @@
 package com.douglaasph.clinic_api.exceptions.handler;
 
-import com.douglaasph.clinic_api.exceptions.DatabaseException;
-import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
-import com.douglaasph.clinic_api.exceptions.TokenException;
+import com.douglaasph.clinic_api.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +53,7 @@ public class GlobalExceptionHandler extends RuntimeException {
         return ResponseEntity.status(status).body(err);
     }
 
-    // ERROR 400 (Token invalid or expired)
+    // ERROR 500
     @ExceptionHandler(TokenException.class)
     public ResponseEntity<StandardError> tokenException(TokenException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST; // Status 400
@@ -63,6 +61,35 @@ public class GlobalExceptionHandler extends RuntimeException {
         err.setTimestamp(Instant.now());
         err.setStatus(status.value());
         err.setError("Token error");
+        err.setMessage(e.getMessage());
+        err.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status).body(err);
+    }
+
+
+    // ERROR 403 (The feature exists, but the rule prevents access at the moment)
+    @ExceptionHandler(ReportNotReleasedException.class)
+    public ResponseEntity<StandardError> reportNotReleasedException(ReportNotReleasedException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN; // Status 403
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError("Exam result not available");
+        err.setMessage(e.getMessage());
+        err.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status).body(err);
+    }
+
+    // ERROR 400 (Business rule violated)
+    @ExceptionHandler(ReportNotReleasedException.class)
+    public ResponseEntity<StandardError> businessRuleException(BusinessRuleException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST; // Status 400
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError("Business rule violated");
         err.setMessage(e.getMessage());
         err.setPath(request.getRequestURI());
 
