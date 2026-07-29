@@ -36,6 +36,9 @@ public class Appointment {
     @Column(nullable = false)
     private Integer appointmentType;
 
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    private XRayReport xRayReport;
+
     public Appointment(Long id, Employee employee, Patient patient, LocalDateTime dateHour, AppointmentStatus appointmentStatus, AppointmentType appointmentType) {
         this.id = id;
         this.employee = employee;

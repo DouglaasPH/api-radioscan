@@ -103,11 +103,15 @@ public class AppointmentService {
     }
 
     @Transactional
-    public String startExamCapture(Long appointmentId, String email) throws AppointmentConflictException {
-        Long loggedEmployeeId = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email))
-                .getPatient()
-                .getId();
+    public RequestUploadResponseDto startExamCapture(Long appointmentId, String email) throws AppointmentConflictException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        if (user.getEmployee() == null) {
+            throw new AppointmentConflictException("Logged user is not registered as an employee.");
+        }
+
+        Long loggedEmployeeId = user.getEmployee().getId();
 
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
@@ -127,7 +131,9 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointmentRepository.save(appointment);
 
-        return xRayReportService.createReportAndGenerateUploadUrl(appointment);
+        return new RequestUploadResponseDto(
+                xRayReportService.createReportAndGenerateUploadUrl(appointment)
+        );
     }
 
     public Page<AppointmentManagementAdminDto> findAllAppointmentsForManagementWithPagination(AppointmentStatus status, String employeeName, Integer page) {

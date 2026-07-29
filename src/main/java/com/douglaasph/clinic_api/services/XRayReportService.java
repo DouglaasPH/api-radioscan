@@ -1,6 +1,8 @@
 package com.douglaasph.clinic_api.services;
 
 import com.douglaasph.clinic_api.config.aws.StorageGateway;
+import com.douglaasph.clinic_api.controllers.dto.xRayReport.RequestDownloadResponseDto;
+import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import com.douglaasph.clinic_api.models.entities.Appointment;
 import com.douglaasph.clinic_api.models.entities.XRayReport;
@@ -41,11 +43,9 @@ public class XRayReportService {
                 null,
                 false,
                 appointment);
-        XRayReport savedReport = xRayReportRepository.save(report);
+        xRayReportRepository.save(report);
 
-        String presignedUrl = storageGateway.generatePresignedUploadUrl(s3Key);
-
-        return presignedUrl;
+        return storageGateway.generatePresignedUploadUrl(s3Key);
     }
 
     @Transactional
@@ -72,4 +72,19 @@ public class XRayReportService {
                 .getId();
         return xRayReportRepository.findAllByAppointment_Patient_IdAndReleasedToPatientTrue(patientId);
     }
+
+    @Transactional
+    public RequestDownloadResponseDto getExamDownloadUrl(Long reportId) throws AppointmentConflictException {
+        XRayReport report = xRayReportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Report", "id", reportId));
+
+        // Business Rule: The exam must be released to the patient.
+        if (!report.isReleasedToPatient()) {
+            throw new AppointmentConflictException("This exam result has not been released by the doctor yet.");
+        }
+
+        String downloadUrl = storageGateway.generatePresignedDownloadUrl(report.getS3Key());
+        return new RequestDownloadResponseDto(downloadUrl);
+    }
+
 }

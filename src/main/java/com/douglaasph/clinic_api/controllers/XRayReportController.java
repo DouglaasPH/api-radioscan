@@ -1,6 +1,8 @@
 package com.douglaasph.clinic_api.controllers;
 
+import com.douglaasph.clinic_api.controllers.dto.xRayReport.RequestDownloadResponseDto;
 import com.douglaasph.clinic_api.controllers.dto.appointment.ReviewDto;
+import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.models.entities.XRayReport;
 import com.douglaasph.clinic_api.services.XRayReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,5 +57,13 @@ public class XRayReportController {
     @GetMapping
     public ResponseEntity<List<XRayReport>> findAll(Authentication authentication) {
         return ResponseEntity.ok().body(xRayReportService.findAllByPatientIdAndReleasedToPatientTrue(authentication.getName()));
+    }
+
+    // AUTHORIZATION: ANYONE
+    @GetMapping("/{reportId}/download")
+    public ResponseEntity<RequestDownloadResponseDto> getDownloadUrl(
+            @PathVariable Long reportId) throws AppointmentConflictException {
+        RequestDownloadResponseDto response = xRayReportService.getExamDownloadUrl(reportId);
+        return ResponseEntity.ok(response);
     }
 }

@@ -24,13 +24,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             a.appointmentStatus,
             a.appointmentType,
             eUser.name,
-            a.dateHour
+            a.dateHour,
+            ax.id,
+            ax.releasedToPatient
         )
         FROM Appointment a
         LEFT JOIN a.employee e
         LEFT JOIN e.user eUser
         LEFT JOIN a.patient p
         LEFT JOIN p.user pUser
+        LEFT JOIN a.xRayReport ax
         WHERE pUser.email = :email
     """)
     List<PatientEmployeeAppointmentResponseDto> findByPatientEmail(@Param("email") String email);

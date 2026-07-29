@@ -1,5 +1,6 @@
 package com.douglaasph.clinic_api.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class XRayReport {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     @Column(nullable = false)
     private String s3Key;
@@ -39,8 +40,15 @@ public class XRayReport {
     @Column(nullable = false)
     private boolean releasedToPatient = false;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "appointment_id", nullable = false)
     private Appointment appointment;
 
+    @PrePersist
+    public void prePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
+    }
 }

@@ -7,5 +7,7 @@ public record PatientEmployeeAppointmentResponseDto(
         Integer appointmentStatus,
         Integer appointmentType,
         String employeeName,
-        LocalDateTime dateHour
+        LocalDateTime dateHour,
+        Long xRayReportId,
+        boolean isReleasedToPatientXRayReport
 ) {}

@@ -107,12 +107,12 @@ public class AppointmentController {
     })
     @PostMapping("/{appointmentId}/request-upload")
     @PreAuthorize("@securityUtils.isEmployeeTechnical(authentication)")
-    public ResponseEntity<Map<String, String>> startExam(
+    public ResponseEntity<RequestUploadResponseDto> startExam(
             @PathVariable Long appointmentId,
             Authentication authentication
     ) throws AppointmentConflictException {
-        String uploadUrl = appointmentService.startExamCapture(appointmentId, authentication.getName());
-        return ResponseEntity.ok(Map.of("uploadUrl", uploadUrl));
+        RequestUploadResponseDto uploadUrl = appointmentService.startExamCapture(appointmentId, authentication.getName());
+        return ResponseEntity.ok(uploadUrl);
     }
 
     // AUTHORIZATION: ONLY ADMIN AND EMPLOYEES
