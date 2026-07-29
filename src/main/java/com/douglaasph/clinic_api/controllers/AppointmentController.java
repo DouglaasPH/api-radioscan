@@ -9,6 +9,7 @@ import com.douglaasph.clinic_api.services.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
@@ -29,6 +30,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping(value = "/appointment")
 @Tag(name = "Appointment", description = "Endpoints for managing appointment of the clinic")
+@SecurityRequirement(name = "bearerAuth")
 public class AppointmentController {
     @Autowired
     private AppointmentService appointmentService;

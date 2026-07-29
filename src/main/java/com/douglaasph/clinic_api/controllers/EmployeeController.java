@@ -9,6 +9,7 @@ import com.douglaasph.clinic_api.services.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/employee")
 @Tag(name = "Employee", description = "Endpoints for managing employees of the clinic")
+@SecurityRequirement(name = "bearerAuth")
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;

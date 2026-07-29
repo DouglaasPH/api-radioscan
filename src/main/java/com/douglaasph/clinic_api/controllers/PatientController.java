@@ -8,6 +8,7 @@ import com.douglaasph.clinic_api.services.PatientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class PatientController {
     }
 
     // AUTHORIZATION: ADMIN or EMPLOYEE (ONLY DOCTOR)
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Find all patients")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "All patients found")
@@ -58,6 +60,7 @@ public class PatientController {
 
     // AUTHORIZATION: ADMIN or THE PATIENT THEMSELVES
     // Business role: Admins have access; patients only have access to their own data.
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Find patient by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Patient found")

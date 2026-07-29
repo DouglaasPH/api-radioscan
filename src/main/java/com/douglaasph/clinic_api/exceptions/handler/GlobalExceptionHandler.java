@@ -83,7 +83,7 @@ public class GlobalExceptionHandler extends RuntimeException {
     }
 
     // ERROR 400 (Business rule violated)
-    @ExceptionHandler(ReportNotReleasedException.class)
+    @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<StandardError> businessRuleException(BusinessRuleException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST; // Status 400
         StandardError err = new StandardError();
