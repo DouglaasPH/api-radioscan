@@ -2,7 +2,7 @@
 
 API backend de uma aplicação de clínica/telemedicina: cadastro e login de pacientes/funcionários (com JWT e OAuth2 do Google), agendamento de consultas, e um fluxo de laudo de raio-X por IA (upload de imagem via URL pré-assinada no S3 e classificação automática por um modelo de Machine Learning).
 
----
+<br>
 
 ## Stack
 
@@ -21,6 +21,7 @@ API backend de uma aplicação de clínica/telemedicina: cadastro e login de pac
 - **Maven Wrapper** (`mvnw`/`mvnw.cmd`) — não é necessário ter o Maven
   instalado globalmente
 
+<br>
 
 ## Arquitetura / estrutura do projeto
 
@@ -40,6 +41,7 @@ services/     -> regras de negócio
 utils/        -> utilitários (ex: extrair usuário autenticado do contexto de segurança)
 ```
 
+<br>
 
 ## Módulos do domínio
 
@@ -53,6 +55,7 @@ utils/        -> utilitários (ex: extrair usuário autenticado do contexto de s
 | Laudo de Raio-X | `XRayReportController` | `XRayReport` | Geração de URL pré-assinada para upload da imagem; consulta do laudo (resultado da IA + diagnóstico médico final) |
 | Administração | `AdminController` | — | Métricas/dashboard administrativo |
 
+<br>
 
 ### Fluxo de laudo por IA (resumo)
 
@@ -72,6 +75,7 @@ utils/        -> utilitários (ex: extrair usuário autenticado do contexto de s
 > um repositório Terraform separado, simulado localmente via LocalStack.
 > Repositório: https://github.com/DouglaasPH/terraform-radioscan
 
+<br>
 
 ## Pré-requisitos
 
@@ -81,6 +85,7 @@ utils/        -> utilitários (ex: extrair usuário autenticado do contexto de s
 - Opcional, só se for testar o upload de imagens: acesso a um endpoint S3
   compatível (LocalStack local ou AWS real)
 
+<br>
 
 ## Configuração (`.env`)
 
@@ -111,6 +116,7 @@ sobrescritas por env var (`AWS_ENDPOINT`, `AWS_REGION`, `AWS_S3_BUCKET_NAME`)
 — variável de ambiente do sistema operacional tem prioridade sobre o valor do
 `application.properties` no Spring Boot.
 
+<br>
 
 ## Rodando localmente
 
@@ -125,6 +131,7 @@ Com `spring.jpa.hibernate.ddl-auto=update` no `application.properties`, o
 Hibernate cria/atualiza o schema do banco automaticamente na primeira
 conexão — não é necessário rodar migrations manuais.
 
+<br>
 
 ## Documentação da API (Swagger)
 
@@ -134,6 +141,7 @@ interativa fica disponível com a aplicação rodando em:
 - Swagger UI: `http://localhost:<porta>/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:<porta>/v3/api-docs`
 
+<br>
 
 ## Testes
 
@@ -141,6 +149,7 @@ interativa fica disponível com a aplicação rodando em:
 .\mvnw test
 ```
 
+<br>
 
 ## Build e deploy (Docker + LocalStack)
 
@@ -164,6 +173,7 @@ ECS puxar a imagem nova e redeployar o serviço automaticamente.
 > passo completo (subir o LocalStack, aplicar a infra, publicar a imagem,
 > variáveis de ambiente que o ECS injeta no container, etc.).
 
+<br>
 
 ## Estrutura de pastas
 
