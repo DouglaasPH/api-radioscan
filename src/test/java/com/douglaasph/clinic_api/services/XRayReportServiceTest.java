@@ -56,7 +56,7 @@ class XRayReportServiceTest {
                 null,
                 null,
                 false,
-                dto.appointment());
+                List.of(dto.appointment()));
 
         Mockito.when(xRayReportRepository.save(any(XRayReport.class))).thenReturn(report);
         Mockito.when(storageGateway.generatePresignedUploadUrl(any(String.class))).thenReturn("mocked-pressigned-url");
@@ -103,7 +103,7 @@ class XRayReportServiceTest {
         assertNotNull(response);
         assertEquals("mocked-final-doctor-diagnosis", response.getFinalMedicalDiagnosis());
         assertEquals(4, response.getProcessingStatus());
-        assertEquals(4, response.getAppointment().getAppointmentStatus());
+        assertEquals(4, response.getAppointment().getFirst().getAppointmentStatus());
         assertTrue(response.isReleasedToPatient());
 
         Mockito.verify(appointmentRepository, Mockito.times(1)).save(any(Appointment.class));
@@ -196,7 +196,7 @@ class XRayReportServiceTest {
 
         Appointment appointment = new Appointment(1L, employee, patient, LocalDateTime.now(), AppointmentStatus.SCHEDULED, AppointmentType.REPORT_REVIEW);
 
-        XRayReport xRayReport = new XRayReport(1L, null, "mocked-s3-key", 3, null, null, false, appointment);
+        XRayReport xRayReport = new XRayReport(1L, null, "mocked-s3-key", 3, null, null, false, List.of(appointment));
 
         return new AppointmentDetailsDto(employee, patient, appointment, xRayReport);
     }

@@ -2,6 +2,7 @@ package com.douglaasph.clinic_api.services;
 
 import com.douglaasph.clinic_api.controllers.dto.appointment.CreateAppointmentDto;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
+import com.douglaasph.clinic_api.exceptions.BusinessRuleException;
 import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import com.douglaasph.clinic_api.models.entities.*;
 import com.douglaasph.clinic_api.models.entities.enums.AppointmentStatus;
@@ -22,6 +23,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -102,7 +105,7 @@ class AppointmentServiceTest {
 
         Mockito.when(employeeRepository.findById(any(Long.class))).thenReturn(Optional.of(incompatibleEmployee));
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> {
             appointmentService.insert(incompatibleDto);
         });
 
@@ -113,7 +116,7 @@ class AppointmentServiceTest {
 
     @Test
     @DisplayName("Should book an appointment successfully when slot is available and requirements are met")
-    void bookCase1() throws AppointmentConflictException {
+    void bookExamCaptureCase1() throws AppointmentConflictException {
         String email = "douglas@example.com";
         Long appointmentId = 1L;
 
@@ -132,7 +135,7 @@ class AppointmentServiceTest {
         Mockito.when(patientRepository.getReferenceById(10L)).thenReturn(patient);
         Mockito.when(appointmentRepository.save(any(Appointment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Appointment result = appointmentService.book(appointmentId, authentication);
+        Appointment result = appointmentService.bookExamCapture(appointmentId, authentication);
 
         assertNotNull(result);
         assertEquals(patient, result.getPatient());
@@ -142,7 +145,7 @@ class AppointmentServiceTest {
 
     @Test
     @DisplayName("Should throw UsernameNotFoundException when scheduling user is not found")
-    void bookCase2() {
+    void bookExamCaptureCase2() {
         String email = "notfound@example.com";
 
         Authentication authentication = Mockito.mock(Authentication.class);
@@ -151,7 +154,7 @@ class AppointmentServiceTest {
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> {
-            appointmentService.book(1L, authentication);
+            appointmentService.bookExamCapture(1L, authentication);
         });
 
         Mockito.verifyNoInteractions(appointmentRepository);
@@ -159,7 +162,7 @@ class AppointmentServiceTest {
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when appointment slot does not exist")
-    void bookCase3() {
+    void bookExamCaptureCase3() {
         String email = "douglas@example.com";
         User user = new User(1L, "Douglas", email, "123", Roles.PATIENT);
         Patient patient = new Patient(10L, "12345678912", "81999999999", user);
@@ -172,13 +175,13 @@ class AppointmentServiceTest {
         Mockito.when(appointmentRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            appointmentService.book(999L, authentication);
+            appointmentService.bookExamCapture(999L, authentication);
         });
     }
 
     @Test
     @DisplayName("Should throw AppointmentConflictException when slot already has a patient assigned")
-    void bookCase4() {
+    void bookExamCaptureCase4() {
         String email = "douglas@example.com";
         Long appointmentId = 1L;
 
@@ -198,7 +201,7 @@ class AppointmentServiceTest {
         Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(occupiedAppointment));
 
         AppointmentConflictException exception = assertThrows(AppointmentConflictException.class, () -> {
-            appointmentService.book(appointmentId, authentication);
+            appointmentService.bookExamCapture(appointmentId, authentication);
         });
 
         assertEquals("This time slot is already reserved by another patient.", exception.getMessage());
@@ -206,7 +209,7 @@ class AppointmentServiceTest {
 
     @Test
     @DisplayName("Should throw AppointmentConflictException when slot status is not AVAILABLE")
-    void bookCase5() {
+    void bookExamCaptureCase5() {
         String email = "douglas@example.com";
         Long appointmentId = 1L;
 
@@ -224,10 +227,45 @@ class AppointmentServiceTest {
         Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(unvailableAppointment));
 
         AppointmentConflictException exception = assertThrows(AppointmentConflictException.class, () -> {
-            appointmentService.book(appointmentId, authentication);
+            appointmentService.bookExamCapture(appointmentId, authentication);
         });
 
         assertEquals("This time slot is not available for scheduling.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should book a report review appointment successfully when slot is available and report exists")
+    void bookReportReviewCase1() throws AppointmentConflictException {
+        String email = "douglas@example.com";
+        Long appointmentId = 1L;
+        Long xRayReportId = 1L;
+
+        User user = new User(1L, "Douglas", email, "123", Roles.PATIENT);
+        Patient patient = new Patient(10L, "12345678912", "81999999999", user);
+        user.setPatient(patient);
+
+        Employee doctor = new Employee(1L, "123456", Position.DOCTOR, new User());
+        Appointment appointment = new Appointment(appointmentId, doctor, null, LocalDateTime.now(), AppointmentStatus.AVAILABLE, AppointmentType.EXAM_CAPTURE);
+
+        XRayReport xRayReport = new XRayReport(1L, null, "mocked-s3-key", 3, null, null, false, new ArrayList<>());
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getName()).thenReturn(email);
+
+        Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
+
+        Mockito.when(xRayReportRepository.findById(xRayReportId)).thenReturn(Optional.of(xRayReport));
+
+        Mockito.when(appointmentRepository.save(any(Appointment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Appointment result = appointmentService.bookReportReview(appointmentId, xRayReportId, authentication);
+
+        assertNotNull(result);
+        assertEquals(patient, result.getPatient());
+        assertEquals(xRayReport, result.getXRayReport());
+        assertEquals(AppointmentStatus.SCHEDULED, result.getStatus());
+        Mockito.verify(appointmentRepository, Mockito.times(1)).save(appointment);
     }
 
     @Test
@@ -292,7 +330,7 @@ class AppointmentServiceTest {
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         Mockito.when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> {
             appointmentService.cancel(appointmentId, email);
         });
 
@@ -309,7 +347,7 @@ class AppointmentServiceTest {
 
         Appointment appointment = new Appointment(1L, employee, patient, LocalDateTime.now(), AppointmentStatus.SCHEDULED, AppointmentType.REPORT_REVIEW);
 
-        XRayReport xRayReport = new XRayReport(1L, null, "mocked-s3-key", 3, null, null, false, appointment);
+        XRayReport xRayReport = new XRayReport(1L, null, "mocked-s3-key", 3, null, null, false, List.of(appointment));
 
         return new AppointmentDetailsDto(employee, patient, appointment, xRayReport);
     }

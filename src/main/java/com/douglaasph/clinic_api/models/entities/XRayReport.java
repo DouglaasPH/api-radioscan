@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,9 +42,8 @@ public class XRayReport {
     private boolean releasedToPatient = false;
 
     @JsonIgnore
-    @OneToOne
-    @JoinColumn(name = "appointment_id", nullable = false)
-    private Appointment appointment;
+    @OneToMany(mappedBy = "xRayReport")
+    private List<Appointment> appointment;
 
     @PrePersist
     public void prePersist() {

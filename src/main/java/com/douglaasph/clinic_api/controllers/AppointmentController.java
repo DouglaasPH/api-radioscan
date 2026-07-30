@@ -81,9 +81,26 @@ public class AppointmentController {
             @ApiResponse(responseCode = "201", description = "Booked appointment with success"),
             @ApiResponse(responseCode = "404", description = "Appointment not found")
     })
-    @PutMapping("/{appointmentId}/book")
-    public ResponseEntity<Appointment> book(@PathVariable Long appointmentId, Authentication authentication) throws AppointmentConflictException {
-        Appointment response = appointmentService.book(appointmentId, authentication);
+    @PutMapping("/exam-capture/{appointmentId}/book")
+    public ResponseEntity<Appointment> bookExamCapture(@PathVariable Long appointmentId, Authentication authentication) throws AppointmentConflictException {
+        Appointment response = appointmentService.bookExamCapture(appointmentId, authentication);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.getId()).toUri();
+        return ResponseEntity.created(uri).body(response);
+    }
+
+    // AUTHORIZATION: PATIENT
+    @Operation(summary = "Book appointment", description = "Book appointment by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Booked appointment with success"),
+            @ApiResponse(responseCode = "404", description = "Appointment not found")
+    })
+    @PutMapping("/report-review/{appointmentId}/{xRayReportId}/book")
+    public ResponseEntity<Appointment> bookReportReview(
+            @PathVariable Long appointmentId,
+            @PathVariable Long xRayReportId,
+            Authentication authentication
+    ) throws AppointmentConflictException {
+        Appointment response = appointmentService.bookReportReview(appointmentId, xRayReportId, authentication);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.getId()).toUri();
         return ResponseEntity.created(uri).body(response);
     }

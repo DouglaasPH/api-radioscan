@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.TestComponent;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @TestComponent
@@ -53,7 +54,7 @@ public class TestEntityFactory {
     public XRayReport createXRayReport(Appointment appointment, boolean releasedToPatient) {
         String s3Key = "exams/" + UUID.randomUUID() + ".png";
         XRayReport report = new XRayReport();
-        report.setAppointment(appointment);
+        report.setAppointment(List.of(appointment));
         report.setS3Key(s3Key);
         report.setProcessingStatus(ProcessingStatus.AWAITING_AI.getCode());
         report.setReleasedToPatient(releasedToPatient);

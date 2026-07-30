@@ -42,7 +42,7 @@ public class XRayReportService {
                 null,
                 null,
                 false,
-                appointment);
+                List.of(appointment));
         xRayReportRepository.save(report);
 
         return storageGateway.generatePresignedUploadUrl(s3Key);

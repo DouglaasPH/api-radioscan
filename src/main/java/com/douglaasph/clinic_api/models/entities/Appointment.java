@@ -36,7 +36,8 @@ public class Appointment {
     @Column(nullable = false)
     private Integer appointmentType;
 
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "x_ray_report_id", nullable = true)
     private XRayReport xRayReport;
 
     public Appointment(Long id, Employee employee, Patient patient, LocalDateTime dateHour, AppointmentStatus appointmentStatus, AppointmentType appointmentType) {

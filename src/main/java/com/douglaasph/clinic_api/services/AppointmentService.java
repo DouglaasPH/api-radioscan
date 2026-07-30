@@ -9,6 +9,7 @@ import com.douglaasph.clinic_api.models.entities.enums.AppointmentType;
 import com.douglaasph.clinic_api.repositories.*;
 import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
+import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AppointmentService {
@@ -35,6 +37,9 @@ public class AppointmentService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private XRayReportRepository xRayReportRepository;
 
     public List<PatientEmployeeAppointmentResponseDto> findByPatientEmail(String loggedEmail, boolean isAdmin) {
             return appointmentRepository.findByPatientEmail(loggedEmail);
@@ -60,11 +65,38 @@ public class AppointmentService {
     }
 
     @Transactional
-    public Appointment book(Long appointmentId, Authentication authentication) throws AppointmentConflictException {
-        Patient patient = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new UsernameNotFoundException(("user not found")))
-                .getPatient();
+    public Appointment bookExamCapture(Long appointmentId, Authentication authentication) throws AppointmentConflictException {
+        Patient patient = getPatientByEmail(authentication.getName());
+        Appointment appointment = getAndValidateAvailableAppointment(appointmentId);
 
+        appointment.setPatient(patient);
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+
+        return appointmentRepository.save(appointment);
+    }
+
+    @Transactional
+    public Appointment bookReportReview(Long appointmentId, Long xRayReportId, Authentication authentication) throws AppointmentConflictException {
+        Patient patient = getPatientByEmail(authentication.getName());
+        Appointment appointment = getAndValidateAvailableAppointment(appointmentId);
+
+        XRayReport xRayReport = xRayReportRepository.findById(xRayReportId)
+                        .orElseThrow(() -> new ResourceNotFoundException("XRayReport", "id", xRayReportId));
+        appointment.setXRayReport(xRayReport);
+
+        appointment.setPatient(patient);
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+
+        return appointmentRepository.save(appointment);
+    }
+
+    private Patient getPatientByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email))
+                .getPatient();
+    }
+
+    private Appointment getAndValidateAvailableAppointment(Long appointmentId) throws AppointmentConflictException {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
@@ -75,13 +107,10 @@ public class AppointmentService {
             throw new AppointmentConflictException("This time slot is not available for scheduling.");
         }
 
-        appointment.setPatient(patient);
-        appointment.setStatus(AppointmentStatus.SCHEDULED);
-
-        return appointmentRepository.save(appointment);
+        return appointment;
     }
 
-    // Business rule: you can only cancel up to 24 hours before your scheduled appointment..
+    // Business rule: you can only cancel up to 24 hours before your scheduled appointment
     @Transactional
     public Appointment cancel(Long appointmentId, String email) {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
