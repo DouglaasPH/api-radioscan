@@ -43,7 +43,10 @@ public class XRayReportService {
                 null,
                 false,
                 List.of(appointment));
-        xRayReportRepository.save(report);
+        XRayReport savedReport = xRayReportRepository.save(report);
+
+        appointment.setXRayReport(savedReport);
+        appointmentRepository.save(appointment);
 
         return storageGateway.generatePresignedUploadUrl(s3Key);
     }

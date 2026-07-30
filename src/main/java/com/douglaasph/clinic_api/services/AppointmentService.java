@@ -41,7 +41,7 @@ public class AppointmentService {
     @Autowired
     private XRayReportRepository xRayReportRepository;
 
-    public List<PatientEmployeeAppointmentResponseDto> findByPatientEmail(String loggedEmail, boolean isAdmin) {
+    public List<PatientEmployeeAppointmentResponseDto> findByPatientEmail(String loggedEmail) {
             return appointmentRepository.findByPatientEmail(loggedEmail);
     }
 
@@ -82,7 +82,9 @@ public class AppointmentService {
 
         XRayReport xRayReport = xRayReportRepository.findById(xRayReportId)
                         .orElseThrow(() -> new ResourceNotFoundException("XRayReport", "id", xRayReportId));
+        xRayReport.setProcessingStatus(3); // AWAITING_VALIDATION_BY_DOCTOR
         appointment.setXRayReport(xRayReport);
+
 
         appointment.setPatient(patient);
         appointment.setStatus(AppointmentStatus.SCHEDULED);
@@ -119,6 +121,10 @@ public class AppointmentService {
         LocalDateTime now = LocalDateTime.now();
         if (now.isAfter(appointment.getDateHour().minusHours(24))) {
             throw new BusinessRuleException("The appointment can only be cancelled with 24 hours' notice.");
+        }
+
+        if (appointment.getXRayReport() != null) {
+            appointment.getXRayReport().setProcessingStatus(2); // PROCESSED_BY_IA
         }
 
         appointment.setStatus(AppointmentStatus.CANCELED);

@@ -68,12 +68,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/appointment/{appointmentId}/cancel").hasAnyRole("ADMIN", "PATIENT")
                         .requestMatchers(HttpMethod.POST, "/appointment/{appointmentId}/request-upload").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/appointment/metrics").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/appointment").hasRole("PATIENT")
                         .requestMatchers(HttpMethod.GET, "/employee").hasAnyRole("ADMIN", "PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/user/data").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/user/password").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
 
                         // private routes that require only authentication
-                        .requestMatchers("/appointment", "/employee/{id}").authenticated()
+                        .requestMatchers("/employee/{id}").authenticated()
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->

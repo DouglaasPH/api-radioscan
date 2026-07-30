@@ -9,5 +9,6 @@ public record PatientEmployeeAppointmentResponseDto(
         String employeeName,
         LocalDateTime dateHour,
         Long xRayReportId,
-        boolean isReleasedToPatientXRayReport
+        Boolean isReleasedToPatientXRayReport, // Boolean -> true, false or null.
+        Boolean isPendingProcessing
 ) {}

@@ -64,15 +64,14 @@ public class AppointmentController {
         return ResponseEntity.ok().body(appointmentService.findAllAvailable(date, appointmentType, page));
     }
 
-    // AUTHORIZATION: ANY ROLE (authenticated only)
-    @Operation(summary = "Find all appointments linked to the user ")
+    // AUTHORIZATION: PATIENT
+    @Operation(summary = "Find all appointments linked to the patient ")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "All inserted appointments")
     })
     @GetMapping
-    public ResponseEntity<List<PatientEmployeeAppointmentResponseDto>> findAll(Authentication authentication) {
-        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ROLE_ADMIN"));
-        return ResponseEntity.ok().body(appointmentService.findByPatientEmail(authentication.getName(), isAdmin));
+    public ResponseEntity<List<PatientEmployeeAppointmentResponseDto>> findAllByPatientEmail(Authentication authentication) {
+        return ResponseEntity.ok().body(appointmentService.findByPatientEmail(authentication.getName()));
     }
 
     // AUTHORIZATION: PATIENT
