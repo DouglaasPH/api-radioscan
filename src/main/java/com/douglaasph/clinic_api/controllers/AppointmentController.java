@@ -25,7 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/appointment")
@@ -194,5 +193,16 @@ public class AppointmentController {
     @GetMapping("metrics")
     public ResponseEntity<DashboardMetricsForEmployeeResponseDto> getMetricsForEmployeees( Authentication authentication) {
         return ResponseEntity.ok(this.appointmentService.metricsForEmployeeDashboard(authentication));
+    }
+
+    // AUTHORIZATION: EMPLOYEE
+    @Operation(summary = "Find appointment by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Appointment"),
+            @ApiResponse(responseCode = "404", description = "Appointment not found with id: 10"),
+    })
+    @GetMapping("{appointmentId}")
+    public ResponseEntity<Appointment> findByAppointmentId(@PathVariable Long appointmentId) {
+        return ResponseEntity.ok().body(appointmentService.findByAppointmentId(appointmentId));
     }
 }

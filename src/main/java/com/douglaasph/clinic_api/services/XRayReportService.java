@@ -5,12 +5,15 @@ import com.douglaasph.clinic_api.controllers.dto.xRayReport.RequestDownloadRespo
 import com.douglaasph.clinic_api.exceptions.ReportNotReleasedException;
 import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import com.douglaasph.clinic_api.models.entities.Appointment;
+import com.douglaasph.clinic_api.models.entities.User;
 import com.douglaasph.clinic_api.models.entities.XRayReport;
 import com.douglaasph.clinic_api.models.entities.enums.ProcessingStatus;
+import com.douglaasph.clinic_api.models.entities.enums.Roles;
 import com.douglaasph.clinic_api.repositories.AppointmentRepository;
 import com.douglaasph.clinic_api.repositories.UserRepository;
 import com.douglaasph.clinic_api.repositories.XRayReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,12 +80,15 @@ public class XRayReportService {
     }
 
     @Transactional
-    public RequestDownloadResponseDto getExamDownloadUrl(Long reportId) throws ReportNotReleasedException {
+    public RequestDownloadResponseDto getExamDownloadUrl(Long reportId, Authentication authentication) throws ReportNotReleasedException {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", authentication.getName()));
+
         XRayReport report = xRayReportRepository.findById(reportId)
                 .orElseThrow(() -> new ResourceNotFoundException("Report", "id", reportId));
 
         // Business Rule: The exam must be released to the patient.
-        if (!report.isReleasedToPatient()) {
+        if (!report.isReleasedToPatient() && user.getRole() == Roles.PATIENT) {
             throw new ReportNotReleasedException("This exam result has not been released by the doctor yet.");
         }
 

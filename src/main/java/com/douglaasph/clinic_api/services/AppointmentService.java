@@ -45,6 +45,11 @@ public class AppointmentService {
             return appointmentRepository.findByPatientEmail(loggedEmail);
     }
 
+    public Appointment findByAppointmentId(Long appointmentId) {
+        return appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
+    }
+
     public Page<AllAvailablesAppointmentsResponseDto> findAllAvailable(LocalDate date, AppointmentType appointmentType, Integer page) {
         PageRequest pageable = PageRequest.of(page, 4);
         return appointmentRepository.findAllAvailablesAppointments(appointmentType.getCode(), date.atStartOfDay(), date.atTime(LocalTime.MAX), pageable);

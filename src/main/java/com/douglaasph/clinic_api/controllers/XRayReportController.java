@@ -64,8 +64,9 @@ public class XRayReportController {
     // AUTHORIZATION: ANYONE
     @GetMapping("/{reportId}/download")
     public ResponseEntity<RequestDownloadResponseDto> getDownloadUrl(
-            @PathVariable Long reportId) throws AppointmentConflictException {
-        RequestDownloadResponseDto response = xRayReportService.getExamDownloadUrl(reportId);
+            @PathVariable Long reportId,
+            Authentication authentication) throws AppointmentConflictException {
+        RequestDownloadResponseDto response = xRayReportService.getExamDownloadUrl(reportId, authentication);
         return ResponseEntity.ok(response);
     }
 }
