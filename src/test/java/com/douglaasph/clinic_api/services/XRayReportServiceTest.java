@@ -5,7 +5,6 @@ import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import com.douglaasph.clinic_api.models.entities.*;
 import com.douglaasph.clinic_api.models.entities.enums.*;
 import com.douglaasph.clinic_api.repositories.AppointmentRepository;
-import com.douglaasph.clinic_api.repositories.UserRepository;
 import com.douglaasph.clinic_api.repositories.XRayReportRepository;
 import com.douglaasph.clinic_api.services.dto.AppointmentDetailsDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,9 +28,6 @@ class XRayReportServiceTest {
 
     @Mock
     private AppointmentRepository appointmentRepository;
-
-    @Mock
-    private UserRepository userRepository;
 
     @Mock
     private StorageGateway storageGateway;
@@ -147,44 +143,6 @@ class XRayReportServiceTest {
 
         Mockito.verify(appointmentRepository, Mockito.never()).save(any());
         Mockito.verify(xRayReportRepository, Mockito.never()).save(any());
-    }
-
-    @Test
-    @DisplayName("Should return a list of XRayReports when found by patient email")
-    void findAllByPatientIdAndReleasedToPatientTrueCase1() {
-        AppointmentDetailsDto dto = appointmentDetails();
-        String userEmail = dto.appointment().getPatient().getUser().getEmail();
-
-        Mockito.when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.ofNullable(dto.appointment().getPatient().getUser()));
-        Mockito.when(xRayReportRepository.findAllByAppointment_Patient_IdAndReleasedToPatientTrue(any(Long.class))).thenReturn(List.of(dto.xRayReport()));
-
-        List<XRayReport> response = xRayReportService.findAllByPatientIdAndReleasedToPatientTrue(userEmail);
-
-        assertNotNull(response);
-        assertEquals(1, response.size());
-        assertEquals(dto.xRayReport().getId(), response.get(0).getId());
-
-        Mockito.verify(xRayReportRepository, Mockito.times(1))
-                .findAllByAppointment_Patient_IdAndReleasedToPatientTrue(any(Long.class));
-    }
-
-    @Test
-    @DisplayName("Should throw ResourceNotFoundException when patient user is not found by email")
-    void findAllByPatientIdAndReleasedToPatientTrueCase2() {
-        String userEmail = appointmentDetails().appointment().getPatient().getUser().getEmail();
-
-        Mockito.when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
-
-        Mockito.when(userRepository.findById(any(Long.class)))
-                .thenThrow(new ResourceNotFoundException("User", "id", appointmentDetails().appointment().getPatient().getUser().getId()));
-
-        RuntimeException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            xRayReportService.findAllByPatientIdAndReleasedToPatientTrue(userEmail);
-        });
-
-        assertEquals("User not found with email: 'example@gmail.com'", exception.getMessage());
-
-        Mockito.verifyNoInteractions(xRayReportRepository);
     }
 
     AppointmentDetailsDto appointmentDetails() {

@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,47 +85,5 @@ class XRayReportRepositoryTest {
         Optional<XRayReport> result = this.xRayReportRepository.findByAppointmentId(1L);
 
         assertThat(result.isPresent()).isFalse();
-    }
-
-    @Test
-    @DisplayName("Should list reports when they belong to the patient and have been released")
-    void findAllByAppointment_Patient_IdAndReleasedToPatientTrueCase5() {
-        UserDto userDto = new UserDto("Douglas Phelipe", "example@gmail.com", "1234");
-        PatientDto patientDto = new PatientDto("12345678912", "81900000000");
-        Patient patient = this.testEntityFactory.createPatient(userDto, patientDto);
-
-        UserDto userDto2 = new UserDto("Mirella Karla", "example2@gmail.com", "1234");
-        EmployeeDto employeeDto = new EmployeeDto("12345678913", Position.DOCTOR);
-        Employee employee = this.testEntityFactory.createEmployee(userDto2, employeeDto);
-
-        CreateAppointmentDto createAppointmentDto = new CreateAppointmentDto(employee.getId(), LocalDateTime.now(), AppointmentType.REPORT_REVIEW);
-
-        Appointment appointment = this.testEntityFactory.createAppointment(patient, employee, createAppointmentDto);
-        this.testEntityFactory.createXRayReport(appointment, true);
-
-        List<XRayReport> result = this.xRayReportRepository.findAllByAppointment_Patient_IdAndReleasedToPatientTrue(appointment.getId());
-
-        assertThat(result.isEmpty()).isFalse();
-    }
-
-    @Test
-    @DisplayName("Should return an empty list when the patient's report has not been released yet")
-    void findAllByAppointment_Patient_IdAndReleasedToPatientTrueCase6() {
-        UserDto userDto = new UserDto("Douglas Phelipe", "example@gmail.com", "1234");
-        PatientDto patientDto = new PatientDto("12345678912", "81900000000");
-        Patient patient = this.testEntityFactory.createPatient(userDto, patientDto);
-
-        UserDto userDto2 = new UserDto("Mirella Karla", "example2@gmail.com", "1234");
-        EmployeeDto employeeDto = new EmployeeDto("12345678913", Position.DOCTOR);
-        Employee employee = this.testEntityFactory.createEmployee(userDto2, employeeDto);
-
-        CreateAppointmentDto createAppointmentDto = new CreateAppointmentDto(employee.getId(), LocalDateTime.now(), AppointmentType.REPORT_REVIEW);
-
-        Appointment appointment = this.testEntityFactory.createAppointment(patient, employee, createAppointmentDto);
-        this.testEntityFactory.createXRayReport(appointment, false);
-
-        List<XRayReport> result = this.xRayReportRepository.findAllByAppointment_Patient_IdAndReleasedToPatientTrue(appointment.getId());
-
-        assertThat(result.isEmpty()).isTrue();
     }
 }

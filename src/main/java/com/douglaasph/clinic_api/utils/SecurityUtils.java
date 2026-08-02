@@ -1,7 +1,9 @@
 package com.douglaasph.clinic_api.utils;
 
+import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import com.douglaasph.clinic_api.models.entities.User;
 import com.douglaasph.clinic_api.models.entities.enums.Position;
+import com.douglaasph.clinic_api.repositories.PatientRepository;
 import com.douglaasph.clinic_api.repositories.UserRepository;
 import com.douglaasph.clinic_api.services.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ public class SecurityUtils {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PatientService patientService;
+    private PatientRepository patientRepository;
 
     public boolean isEmployeeDoctor(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) return false;
@@ -41,6 +43,8 @@ public class SecurityUtils {
 
         return user.getRole().getCode() == 1 ||
                 (user.getRole().getCode() == 3 &&
-                        Objects.equals(patientService.findById(patientId).getId(), user.getPatient().getId()));
+                        Objects.equals(
+                                patientRepository.findById(patientId).orElseThrow(() -> new ResourceNotFoundException("Patient", "id", patientId))
+                                        .getId(), user.getPatient().getId()));
     }
 }

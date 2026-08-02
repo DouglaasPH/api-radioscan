@@ -8,7 +8,6 @@ import com.douglaasph.clinic_api.models.entities.enums.Position;
 import com.douglaasph.clinic_api.models.entities.enums.Roles;
 import com.douglaasph.clinic_api.repositories.EmployeeRepository;
 import com.douglaasph.clinic_api.exceptions.DatabaseException;
-import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
 import com.douglaasph.clinic_api.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,14 +49,6 @@ public class EmployeeService {
         } catch (DataIntegrityViolationException e) {
             throw new DatabaseException("Registration error: Email or document may already exist.");
         }
-    }
-
-    public List<Employee> findAll(String name, Position position) {
-        return employeeRepository.findByOptionalFilters(name, position == null ? null : position.getCode());
-    }
-
-    public Employee findById(Long id) {
-        return employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee", "id", id));
     }
 
     public EmployeesManagementMetricsDto employeesManagementMetrics() {

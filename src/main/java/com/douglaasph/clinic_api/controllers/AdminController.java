@@ -42,8 +42,4 @@ public class AdminController {
     public ResponseEntity<DashboardAdminMetricsDto> dashboardMetrics() {
         return ResponseEntity.ok(this.adminService.dashboardMetrics());
     }
-
-
-
-
 }

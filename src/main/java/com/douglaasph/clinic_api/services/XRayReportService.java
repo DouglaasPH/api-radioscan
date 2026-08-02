@@ -72,14 +72,6 @@ public class XRayReportService {
     }
 
     @Transactional
-    public List<XRayReport> findAllByPatientIdAndReleasedToPatientTrue(String email) {
-        Long patientId = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email))
-                .getId();
-        return xRayReportRepository.findAllByAppointment_Patient_IdAndReleasedToPatientTrue(patientId);
-    }
-
-    @Transactional
     public RequestDownloadResponseDto getExamDownloadUrl(Long reportId, Authentication authentication) throws ReportNotReleasedException {
         User user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", authentication.getName()));

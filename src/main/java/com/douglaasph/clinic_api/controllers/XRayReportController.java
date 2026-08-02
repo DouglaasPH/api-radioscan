@@ -16,8 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(value = "/x-ray")
 @Tag(name = "X-Ray", description = "Endpoints for managing and retrieving X-Ray exam reports")
@@ -43,22 +41,6 @@ public class XRayReportController {
             @RequestBody ReviewDto dto
     ) {
         return ResponseEntity.ok().body(xRayReportService.reviewDoctor(appointmentId, dto.finalDoctorDiagnosis()));
-    }
-
-
-    // AUTHORIZATION: PATIENT
-    @Operation(
-            summary = "Find pending X-Ray exams for patient",
-            description = "Retrieves all X-Ray reports belonging to the authenticated patient that have NOT yet been released for public view (where releasedToPatient is false)."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of pending X-Ray reports retrieved successfully."),
-            @ApiResponse(responseCode = "401", description = "Patient is not authenticated or token is invalid."),
-            @ApiResponse(responseCode = "404", description = "Patient profile not found for the authenticated user.")
-    })
-    @GetMapping
-    public ResponseEntity<List<XRayReport>> findAll(Authentication authentication) {
-        return ResponseEntity.ok().body(xRayReportService.findAllByPatientIdAndReleasedToPatientTrue(authentication.getName()));
     }
 
     // AUTHORIZATION: ANYONE

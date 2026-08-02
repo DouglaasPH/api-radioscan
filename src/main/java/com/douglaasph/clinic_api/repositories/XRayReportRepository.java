@@ -14,7 +14,5 @@ public interface XRayReportRepository extends JpaRepository<XRayReport, Long> {
 
     Optional<XRayReport> findByAppointmentId(Long appointmentId);
 
-    List<XRayReport> findAllByAppointment_Patient_IdAndReleasedToPatientTrue(Long patientId);
-
     List<XRayReport> findByCreatedAtBetween(Instant startOfDay, Instant endOfDay);
 }

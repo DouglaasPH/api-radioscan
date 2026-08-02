@@ -43,7 +43,6 @@ public class SecurityConfig {
                                 "/auth/login/google",
                                 "/refresh-token/{refreshToken}",
                                 "/patient/register",
-                                "/patient/register/google",
 
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -57,10 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/appointment/management").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/employee/register").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/x-ray/{appointmentId}/review").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET, "/x-ray").hasRole("PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/x-ray/{reportId}/download").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
-                        .requestMatchers(HttpMethod.GET, "/patient").hasAnyRole("ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET, "/patient/{id}").hasAnyRole("ADMIN", "PATIENT")
                         .requestMatchers(HttpMethod.POST, "/appointment").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/appointment/available").hasAnyRole("ADMIN", "PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/appointment/exam-capture/{appointmentId}/book").hasRole("PATIENT")
@@ -70,12 +66,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/appointment/metrics").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/appointment").hasRole("PATIENT")
                         .requestMatchers(HttpMethod.GET, "/appointment/{appointmentId}").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET, "/employee").hasAnyRole("ADMIN", "PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/user/data").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/user/password").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
 
-                        // private routes that require only authentication
-                        .requestMatchers("/employee/{id}").authenticated()
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->

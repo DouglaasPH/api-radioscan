@@ -42,26 +42,6 @@ public class EmployeeController {
         return ResponseEntity.created(uri).body(employeeResponse);
     }
 
-    // AUTHORIZATION: ADMIN or PATIENT
-    @Operation(summary = "Find all by name or position or both")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "All doctors found")
-    })
-    @GetMapping
-    public ResponseEntity<List<Employee>> findAllByNameOrPosition (@RequestParam(required = false) String name, @RequestParam(required = false) Position position) {
-        return ResponseEntity.ok().body(employeeService.findAll(name, position));
-    }
-
-    // AUTHORIZATION: ANY ROLE (authenticated only)
-    @Operation(summary = "Find employee by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Employee found")
-    })
-    @GetMapping("/{id}")
-    public ResponseEntity<Employee> findById (@PathVariable Long id) {
-        return ResponseEntity.ok().body(employeeService.findById(id));
-    }
-
     // AUTHORIZATION: ONLY ADMIN
     @Operation(
             summary = "Get employee management metrics for admin",
