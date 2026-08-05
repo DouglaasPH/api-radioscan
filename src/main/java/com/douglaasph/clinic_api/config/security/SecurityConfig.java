@@ -50,24 +50,29 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // private routes that require authentication and role-based authorization
+                        .requestMatchers(HttpMethod.PUT, "/user/password").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
+                        .requestMatchers(HttpMethod.PUT, "/user/data").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
+                        .requestMatchers(HttpMethod.GET, "/user").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
+
                         .requestMatchers(HttpMethod.GET, "/admin/metrics/dashboard").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/employee/metrics/admin").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/employee/management/admin").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/appointment/management").hasAnyRole("ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.POST, "/employee/register").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.PUT, "/x-ray/{appointmentId}/review").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.PUT, "/x-ray/{reportId}/download").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
-                        .requestMatchers(HttpMethod.POST, "/appointment").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/appointment/available").hasAnyRole("ADMIN", "PATIENT")
-                        .requestMatchers(HttpMethod.PUT, "/appointment/exam-capture/{appointmentId}/book").hasRole("PATIENT")
-                        .requestMatchers(HttpMethod.PUT, "/appointment/report-review/{appointmentId}/{xRayReportId}/book").hasRole("PATIENT")
+
+                        .requestMatchers(HttpMethod.POST, "/employee/register").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/employee/metrics/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/employee/management/admin").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.PUT, "/appointment/{appointmentId}/cancel").hasAnyRole("ADMIN", "PATIENT")
-                        .requestMatchers(HttpMethod.POST, "/appointment/{appointmentId}/request-upload").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET, "/appointment/metrics").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.PUT, "/appointment/report-review/{appointmentId}/{xRayReportId}/book").hasRole("PATIENT")
+                        .requestMatchers(HttpMethod.PUT, "/appointment/exam-capture/{appointmentId}/book").hasRole("PATIENT")
                         .requestMatchers(HttpMethod.GET, "/appointment").hasRole("PATIENT")
+                        .requestMatchers(HttpMethod.POST, "/appointment").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/appointment/{appointmentId}/request-upload").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/appointment/{appointmentId}").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.PUT, "/user/data").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
-                        .requestMatchers(HttpMethod.PUT, "/user/password").hasAnyRole("ADMIN", "EMPLOYEE", "PATIENT")
+                        .requestMatchers(HttpMethod.GET, "/appointment/metrics").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/appointment/management").hasAnyRole("ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/appointment/available").hasAnyRole("ADMIN", "PATIENT")
 
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)

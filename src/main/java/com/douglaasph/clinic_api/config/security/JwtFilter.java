@@ -1,20 +1,19 @@
 package com.douglaasph.clinic_api.config.security;
 
-import com.douglaasph.clinic_api.services.JWTService;
-import com.douglaasph.clinic_api.services.AuthService;
+import com.douglaasph.clinic_api.domain.ports.outbound.TokenProviderAdapterPort;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,19 +21,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
-    @Autowired
-    private JWTService jwtService;
-
-    @Autowired
-    private ApplicationContext context;
+    private final TokenProviderAdapterPort tokenProviderAdapterPort;
+    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
 
         // If it is the patient login or registration route, let it pass through WITHOUT validating the JWT.
-        System.out.println(requestURI);
         if ("/auth/login".equals(requestURI) || "/patient/register".equals(requestURI) || requestURI.startsWith("/refresh-token/")) {
             filterChain.doFilter(request, response);
             return;
@@ -47,12 +43,12 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             if(authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
-                email =jwtService.extractUserName(token);
+                email = tokenProviderAdapterPort.extractUsername(token);
             }
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = context.getBean(AuthService.class).loadUserByUsername(email);
-                if (jwtService.validateToken(token, userDetails)) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                if (tokenProviderAdapterPort.isTokenValid(token, userDetails.getUsername())) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);

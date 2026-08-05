@@ -95,4 +95,46 @@ public class GlobalExceptionHandler extends RuntimeException {
 
         return ResponseEntity.status(status).body(err);
     }
+
+    // ERROR 401
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<StandardError> handleInvalidPassword(InvalidPasswordException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError("Invalid password");
+        err.setMessage(e.getMessage());
+        err.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status).body(err);
+    }
+
+    // ERROR 409 (Conflict / Slot already taken)
+    @ExceptionHandler(AppointmentConflictException.class)
+    public ResponseEntity<StandardError> handleAppointmentConflict(AppointmentConflictException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT; // 409 Conflict
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError("Appointment conflict");
+        err.setMessage(e.getMessage());
+        err.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status).body(err);
+    }
+
+    // ERROR 403 (Forbidden / Resource Access Denied)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<StandardError> handleAccessDenied(AccessDeniedException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError("Access Denied");
+        err.setMessage(e.getMessage());
+        err.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status).body(err);
+    }
 }
