@@ -1,6 +1,5 @@
 package com.douglaasph.clinic_api.adapter.outbound.repository.employee;
 
-import com.douglaasph.clinic_api.adapter.outbound.repository.user.UserJpaMapper;
 import com.douglaasph.clinic_api.domain.domain.Employee;
 
 public class EmployeeJpaMapper {
@@ -9,7 +8,7 @@ public class EmployeeJpaMapper {
                 entity.getId(),
                 entity.getLicenseNumber(),
                 entity.getPosition(),
-                UserJpaMapper.toDomain(entity.getUser())
+                null
         );
     }
 
@@ -18,7 +17,7 @@ public class EmployeeJpaMapper {
                 employee.getId(),
                 employee.getLicenseNumber(),
                 employee.getPosition(),
-                UserJpaMapper.toEntity(employee.getUser())
+                null
         );
     }
 }

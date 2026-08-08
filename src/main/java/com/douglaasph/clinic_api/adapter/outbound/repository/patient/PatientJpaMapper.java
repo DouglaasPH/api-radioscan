@@ -9,7 +9,7 @@ public class PatientJpaMapper {
                 entity.getId(),
                 entity.getCpf(),
                 entity.getPhone(),
-                UserJpaMapper.toDomain(entity.getUser())
+                null
         );
     }
 
@@ -18,7 +18,7 @@ public class PatientJpaMapper {
                 patient.getId(),
                 patient.getCpf(),
                 patient.getPhone(),
-                UserJpaMapper.toEntity(patient.getUser())
+                null
         );
     }
 }

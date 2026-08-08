@@ -26,7 +26,8 @@ public interface AppointmentRepository extends JpaRepository<AppointmentJpaEntit
             a.dateHour,
             ax.id,
             ax.releasedToPatient,
-            CASE WHEN (ax.processingStatus NOT IN (3, 4)) THEN true ELSE false END
+            CASE WHEN (ax.processingStatus NOT IN (3, 4)) THEN true ELSE false END,
+                ax.finalMedicalDiagnosis
         )
         FROM AppointmentJpaEntity a
         LEFT JOIN a.employee e

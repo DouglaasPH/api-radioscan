@@ -12,10 +12,12 @@ public class AppointmentsLinkedToThePatientResult {
     private Boolean isReleasedToPatientXRayReport; // Boolean -> true, false or null.
     private Boolean isPendingProcessing;
 
+    private String finalMedicalDiagnosis;
+
     public AppointmentsLinkedToThePatientResult() {
     }
 
-    public AppointmentsLinkedToThePatientResult(Long id, Integer appointmentStatus, Integer appointmentType, String employeeName, LocalDateTime dateHour, Long xRayReportId, Boolean isReleasedToPatientXRayReport, Boolean isPendingProcessing) {
+    public AppointmentsLinkedToThePatientResult(Long id, Integer appointmentStatus, Integer appointmentType, String employeeName, LocalDateTime dateHour, Long xRayReportId, Boolean isReleasedToPatientXRayReport, Boolean isPendingProcessing, String finalMedicalDiagnosis) {
         this.id = id;
         this.appointmentStatus = appointmentStatus;
         this.appointmentType = appointmentType;
@@ -24,6 +26,7 @@ public class AppointmentsLinkedToThePatientResult {
         this.xRayReportId = xRayReportId;
         this.isReleasedToPatientXRayReport = isReleasedToPatientXRayReport;
         this.isPendingProcessing = isPendingProcessing;
+        this.finalMedicalDiagnosis = finalMedicalDiagnosis;
     }
 
     public Long getId() {
@@ -88,5 +91,13 @@ public class AppointmentsLinkedToThePatientResult {
 
     public void setPendingProcessing(Boolean pendingProcessing) {
         isPendingProcessing = pendingProcessing;
+    }
+
+    public String getFinalMedicalDiagnosis() {
+        return finalMedicalDiagnosis;
+    }
+
+    public void setFinalMedicalDiagnosis(String finalMedicalDiagnosis) {
+        this.finalMedicalDiagnosis = finalMedicalDiagnosis;
     }
 }

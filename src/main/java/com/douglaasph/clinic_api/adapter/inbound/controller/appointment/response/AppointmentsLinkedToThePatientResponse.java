@@ -13,11 +13,12 @@ public class AppointmentsLinkedToThePatientResponse {
     private Long xRayReportId;
     private Boolean isReleasedToPatientXRayReport; // Boolean -> true, false or null.
     private Boolean isPendingProcessing;
+    private String finalMedicalDiagnosis;
 
     public AppointmentsLinkedToThePatientResponse() {
     }
 
-    public AppointmentsLinkedToThePatientResponse(Long id, Integer appointmentStatus, Integer appointmentType, String employeeName, LocalDateTime dateHour, Long xRayReportId, Boolean isReleasedToPatientXRayReport, Boolean isPendingProcessing) {
+    public AppointmentsLinkedToThePatientResponse(Long id, Integer appointmentStatus, Integer appointmentType, String employeeName, LocalDateTime dateHour, Long xRayReportId, Boolean isReleasedToPatientXRayReport, Boolean isPendingProcessing, String finalMedicalDiagnosis) {
         this.id = id;
         this.appointmentStatus = appointmentStatus;
         this.appointmentType = appointmentType;
@@ -26,6 +27,7 @@ public class AppointmentsLinkedToThePatientResponse {
         this.xRayReportId = xRayReportId;
         this.isReleasedToPatientXRayReport = isReleasedToPatientXRayReport;
         this.isPendingProcessing = isPendingProcessing;
+        this.finalMedicalDiagnosis = finalMedicalDiagnosis;
     }
 
     public static AppointmentsLinkedToThePatientResponse fromDomain(AppointmentsLinkedToThePatientResult appointmentsLinkedToThePatientResult) {
@@ -37,7 +39,8 @@ public class AppointmentsLinkedToThePatientResponse {
                 appointmentsLinkedToThePatientResult.getDateHour(),
                 appointmentsLinkedToThePatientResult.getxRayReportId(),
                 appointmentsLinkedToThePatientResult.getReleasedToPatientXRayReport(),
-                appointmentsLinkedToThePatientResult.getPendingProcessing()
+                appointmentsLinkedToThePatientResult.getPendingProcessing(),
+                appointmentsLinkedToThePatientResult.getFinalMedicalDiagnosis()
                 );
     }
 
@@ -103,5 +106,13 @@ public class AppointmentsLinkedToThePatientResponse {
 
     public void setPendingProcessing(Boolean pendingProcessing) {
         isPendingProcessing = pendingProcessing;
+    }
+
+    public String getFinalMedicalDiagnosis() {
+        return finalMedicalDiagnosis;
+    }
+
+    public void setFinalMedicalDiagnosis(String finalMedicalDiagnosis) {
+        this.finalMedicalDiagnosis = finalMedicalDiagnosis;
     }
 }

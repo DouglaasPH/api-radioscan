@@ -3,6 +3,7 @@ package com.douglaasph.clinic_api.adapter.inbound.controller.employee.request;
 import com.douglaasph.clinic_api.domain.domain.enums.Position;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class CreateEmployeeRequest {
     @NotBlank(message = "The name cannot be blank.")
@@ -18,7 +19,7 @@ public class CreateEmployeeRequest {
     @NotBlank(message = "The license number cannot be blank.")
     private String licenseNumber;
 
-    @NotBlank(message = "The position cannot be blank.")
+    @NotNull(message = "The position cannot be null.")
     private  Position position;
     
     public CreateEmployeeRequest() {}
