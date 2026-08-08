@@ -12,7 +12,7 @@ public class AppointmentJPaMapper {
         return new Appointment(
                 entity.getId(),
                 EmployeeJpaMapper.toDomain(entity.getEmployee()),
-                PatientJpaMapper.toDomain(entity.getPatient()),
+                entity.getPatient() != null ?PatientJpaMapper.toDomain(entity.getPatient()) : null,
                 entity.getDateHour(),
                 AppointmentStatus.valueOf(entity.getAppointmentStatus()),
                 AppointmentType.valueOf(entity.getAppointmentType()),
@@ -24,7 +24,7 @@ public class AppointmentJPaMapper {
         return new AppointmentJpaEntity(
                 appointment.getId(),
                 EmployeeJpaMapper.toEntity(appointment.getEmployee()),
-                PatientJpaMapper.toEntity(appointment.getPatient()),
+                appointment.getPatient() != null ? PatientJpaMapper.toEntity(appointment.getPatient()): null,
                 appointment.getDateHour(),
                 appointment.getStatus(),
                 appointment.getType()
