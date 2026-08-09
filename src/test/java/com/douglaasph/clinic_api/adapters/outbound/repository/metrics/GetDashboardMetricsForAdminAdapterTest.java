@@ -77,7 +77,8 @@ public class GetDashboardMetricsForAdminAdapterTest {
                 patient,
                 dateHour,
                 AppointmentStatus.valueOf(status),
-                AppointmentType.REPORT_REVIEW
+                AppointmentType.REPORT_REVIEW,
+                null
         );
     }
 

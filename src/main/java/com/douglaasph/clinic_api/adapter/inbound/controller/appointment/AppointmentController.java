@@ -247,6 +247,8 @@ public class AppointmentController {
             @ApiResponse(responseCode = "404", description = "Appointment not found", content = @Content)
     })
     public ResponseEntity<Appointment> findByAppointmentId(@PathVariable Long appointmentId) {
-        return ResponseEntity.ok().body(getAppointmentByIdUseCasePort.execute(appointmentId));
+        Appointment a = getAppointmentByIdUseCasePort.execute(appointmentId);
+        System.out.println(a.getXRayReport().getCreatedAt());
+        return ResponseEntity.ok().body(a);
     }
 }

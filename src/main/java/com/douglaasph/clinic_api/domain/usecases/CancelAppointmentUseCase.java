@@ -52,8 +52,8 @@ public class CancelAppointmentUseCase implements CancelAppointmentUseCasePort {
             throw new BusinessRuleException("The appointment can only be cancelled with 24 hours' notice.");
         }
 
-        if (appointment.getxRayReport() != null) {
-            appointment.getxRayReport().setProcessingStatus(2); // PROCESSED_BY_IA
+        if (appointment.getXRayReport() != null) {
+            appointment.getXRayReport().setProcessingStatus(2); // PROCESSED_BY_IA
         }
 
         appointment.setStatus(AppointmentStatus.CANCELED);

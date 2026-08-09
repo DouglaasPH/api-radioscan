@@ -51,8 +51,6 @@ public class DoctorReviewExamUseCaseTest {
     @DisplayName("Must return XRayReport when credentials are valid")
     void case1() {
         // arrange
-        Appointment appointment = new Appointment(APPOINTMENT_ID, null, null, LocalDateTime.now().plusDays(2), AppointmentStatus.AVAILABLE, AppointmentType.EXAM_CAPTURE, null);
-        when(getAppointmentByIdAdapterPort.get(APPOINTMENT_ID)).thenReturn(Optional.of(appointment));
         XRayReport xRayReport = new XRayReport(
                 null,
                 null,
@@ -61,9 +59,10 @@ public class DoctorReviewExamUseCaseTest {
                 null,
                 null,
                 false,
-                List.of(appointment)
+                List.of()
         );
-        when(getXRayReportByIdAdapterPort.get(APPOINTMENT_ID)).thenReturn(Optional.of(xRayReport));
+        Appointment appointment = new Appointment(APPOINTMENT_ID, null, null, LocalDateTime.now().plusDays(2), AppointmentStatus.AVAILABLE, AppointmentType.EXAM_CAPTURE, xRayReport);
+        when(getAppointmentByIdAdapterPort.get(APPOINTMENT_ID)).thenReturn(Optional.of(appointment));
         when(saveAppointmentAdapterPort.save(appointment)).thenReturn(appointment);
         when(saveXRayReportAdapterPort.save(xRayReport)).thenReturn(xRayReport);
 
@@ -76,7 +75,6 @@ public class DoctorReviewExamUseCaseTest {
         assertThat(result.isReleasedToPatient()).isTrue();
 
         verify(getAppointmentByIdAdapterPort).get(APPOINTMENT_ID);
-        verify(getXRayReportByIdAdapterPort).get(APPOINTMENT_ID);
         verify(saveAppointmentAdapterPort).save(appointment);
         verify(saveXRayReportAdapterPort).save(xRayReport);
     }
@@ -104,8 +102,6 @@ public class DoctorReviewExamUseCaseTest {
         // arrange
         Appointment appointment = new Appointment(APPOINTMENT_ID, null, null, LocalDateTime.now().plusDays(2), AppointmentStatus.AVAILABLE, AppointmentType.EXAM_CAPTURE, null);
         when(getAppointmentByIdAdapterPort.get(APPOINTMENT_ID)).thenReturn(Optional.of(appointment));
-        doThrow(new ResourceNotFoundException("XRayReport", "id of the appointment", APPOINTMENT_ID))
-                .when(getXRayReportByIdAdapterPort).get(APPOINTMENT_ID);
 
         // act + assert
         assertThatThrownBy(() -> doctorReviewExamUseCase.execute(APPOINTMENT_ID, FINAL_DOCTOR_DIAGNOSIS))

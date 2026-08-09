@@ -37,7 +37,7 @@ public class AppointmentsLinkedToThePatientResponse {
                 appointmentsLinkedToThePatientResult.getAppointmentType(),
                 appointmentsLinkedToThePatientResult.getEmployeeName(),
                 appointmentsLinkedToThePatientResult.getDateHour(),
-                appointmentsLinkedToThePatientResult.getxRayReportId(),
+                appointmentsLinkedToThePatientResult.getXRayReportId(),
                 appointmentsLinkedToThePatientResult.getReleasedToPatientXRayReport(),
                 appointmentsLinkedToThePatientResult.getPendingProcessing(),
                 appointmentsLinkedToThePatientResult.getFinalMedicalDiagnosis()
@@ -84,11 +84,11 @@ public class AppointmentsLinkedToThePatientResponse {
         this.dateHour = dateHour;
     }
 
-    public Long getxRayReportId() {
+    public Long getXRayReportId() {
         return xRayReportId;
     }
 
-    public void setxRayReportId(Long xRayReportId) {
+    public void setXRayReportId(Long xRayReportId) {
         this.xRayReportId = xRayReportId;
     }
 

@@ -1,10 +1,11 @@
 package com.douglaasph.clinic_api.adapter.outbound.repository.xrayreport;
 
-import com.douglaasph.clinic_api.adapter.outbound.repository.appointment.AppointmentJPaMapper;
 import com.douglaasph.clinic_api.domain.domain.XRayReport;
 import com.douglaasph.clinic_api.domain.ports.outbound.SaveXRayReportAdapterPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class SaveXRayReportAdapter implements SaveXRayReportAdapterPort {
                 xRayReport.getAiResult(),
                 xRayReport.getFinalMedicalDiagnosis(),
                 xRayReport.isReleasedToPatient(),
-                xRayReport.getAppointment().stream().map(AppointmentJPaMapper::toEntity).toList()
+                List.of()
         );
         return XRayReportJpaMapper.toDomain(xRayReportRepository.save(xRayReportJpaEntity));
     }

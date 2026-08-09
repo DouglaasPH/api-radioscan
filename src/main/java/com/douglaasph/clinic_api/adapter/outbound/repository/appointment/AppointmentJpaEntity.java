@@ -43,13 +43,14 @@ public class AppointmentJpaEntity {
     @JoinColumn(name = "x_ray_report_id", nullable = true)
     private XRayReportJpaEntity xRayReport;
 
-    public AppointmentJpaEntity(Long id, EmployeeJpaEntity employee, PatientJpaEntity patient, LocalDateTime dateHour, AppointmentStatus appointmentStatus, AppointmentType appointmentType) {
+    public AppointmentJpaEntity(Long id, EmployeeJpaEntity employee, PatientJpaEntity patient, LocalDateTime dateHour, AppointmentStatus appointmentStatus, AppointmentType appointmentType, XRayReportJpaEntity xRayReport) {
         this.id = id;
         this.employee = employee;
         this.patient = patient;
         this.dateHour = dateHour;
         setStatus(appointmentStatus);
         setType(appointmentType);
+        this.xRayReport = xRayReport;
     }
 
     public AppointmentStatus getStatus() {

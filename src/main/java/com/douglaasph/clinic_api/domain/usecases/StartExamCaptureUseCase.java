@@ -78,10 +78,11 @@ public class StartExamCaptureUseCase implements StartExamCaptureUseCasePort {
                 null,
                 null,
                 false,
-                List.of(appointment));
+                List.of()
+        );
         XRayReport savedReport = saveXRayReportAdapterPort.save(report);
 
-        appointment.setxRayReport(savedReport);
+        appointment.setXRayReport(savedReport);
         saveAppointmentAdapterPort.save(appointment);
 
         return fileStorageAdapterPort.generateUploadUrl(s3Key);

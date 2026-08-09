@@ -1,6 +1,5 @@
 package com.douglaasph.clinic_api.domain.domain;
 
-import com.douglaasph.clinic_api.adapter.outbound.repository.employee.EmployeeJpaEntity;
 import com.douglaasph.clinic_api.domain.domain.enums.Position;
 
 public class Employee {

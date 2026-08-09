@@ -1,7 +1,8 @@
 package com.douglaasph.clinic_api.adapter.outbound.repository.xrayreport;
 
-import com.douglaasph.clinic_api.adapter.outbound.repository.appointment.AppointmentJPaMapper;
 import com.douglaasph.clinic_api.domain.domain.XRayReport;
+
+import java.util.List;
 
 public class XRayReportJpaMapper {
     public static XRayReport toDomain(XRayReportJpaEntity entity) {
@@ -13,7 +14,7 @@ public class XRayReportJpaMapper {
                 entity.getAiResult(),
                 entity.getFinalMedicalDiagnosis(),
                 entity.isReleasedToPatient(),
-                entity.getAppointment().stream().map(AppointmentJPaMapper::toDomain).toList()
+                List.of()
         );
     }
 
@@ -26,7 +27,7 @@ public class XRayReportJpaMapper {
                 xRayReport.getAiResult(),
                 xRayReport.getFinalMedicalDiagnosis(),
                 xRayReport.isReleasedToPatient(),
-                xRayReport.getAppointment().stream().map(AppointmentJPaMapper::toEntity).toList()
+                List.of()
         );
     }
 }

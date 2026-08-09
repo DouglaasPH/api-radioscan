@@ -78,11 +78,11 @@ public class Appointment {
         this.dateHour = dateHour;
     }
 
-    public XRayReport getxRayReport() {
+    public XRayReport getXRayReport() {
         return xRayReport;
     }
 
-    public void setxRayReport(XRayReport xRayReport) {
+    public void setXRayReport(XRayReport xRayReport) {
         this.xRayReport = xRayReport;
     }
 }

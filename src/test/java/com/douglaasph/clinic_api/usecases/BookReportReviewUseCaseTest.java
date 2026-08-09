@@ -6,10 +6,7 @@ import com.douglaasph.clinic_api.domain.domain.User;
 import com.douglaasph.clinic_api.domain.domain.XRayReport;
 import com.douglaasph.clinic_api.domain.domain.enums.AppointmentStatus;
 import com.douglaasph.clinic_api.domain.domain.enums.AppointmentType;
-import com.douglaasph.clinic_api.domain.ports.outbound.GetAppointmentByIdAdapterPort;
-import com.douglaasph.clinic_api.domain.ports.outbound.GetUserByEmailAdapterPort;
-import com.douglaasph.clinic_api.domain.ports.outbound.GetXRayReportByIdAdapterPort;
-import com.douglaasph.clinic_api.domain.ports.outbound.SaveAppointmentAdapterPort;
+import com.douglaasph.clinic_api.domain.ports.outbound.*;
 import com.douglaasph.clinic_api.domain.usecases.BookReportReviewUseCase;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.exceptions.BusinessRuleException;
@@ -42,6 +39,9 @@ public class BookReportReviewUseCaseTest {
     @Mock
     private GetXRayReportByIdAdapterPort getXRayReportByIdAdapterPort;
 
+    @Mock
+    private SaveXRayReportAdapterPort saveXRayReportAdapterPort;
+
     @InjectMocks
     private BookReportReviewUseCase bookReportReviewUseCase;
 
@@ -60,6 +60,7 @@ public class BookReportReviewUseCaseTest {
         when(getAppointmentByIdAdapterPort.get(APPOINTMENT_ID)).thenReturn(Optional.of(appointment));
         XRayReport xRayReport = new XRayReport(XRAYREPORT_ID, null,null,null, null, null, false, null);
         when(getXRayReportByIdAdapterPort.get(XRAYREPORT_ID)).thenReturn(Optional.of(xRayReport));
+        when(saveXRayReportAdapterPort.save(xRayReport)).thenReturn(xRayReport);
         when(saveAppointmentAdapterPort.save(appointment)).thenReturn(appointment);
 
         // act
@@ -72,6 +73,7 @@ public class BookReportReviewUseCaseTest {
 
         verify(getUserByEmailAdapterPort).findByEmail(PATIENT_EMAIL);
         verify(getAppointmentByIdAdapterPort).get(APPOINTMENT_ID);
+        verify(saveXRayReportAdapterPort).save(xRayReport);
         verify(saveAppointmentAdapterPort).save(appointment);
     }
 

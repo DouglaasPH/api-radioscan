@@ -102,7 +102,7 @@ public class StartExamCaptureUseCaseTest {
 
         assertThat(result.getUrlPreassignedS3()).isEqualTo("https://s3.fake/presigned-url");
         assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
-        assertThat(appointment.getxRayReport()).isNotNull();
+        assertThat(appointment.getXRayReport()).isNotNull();
 
         verify(saveAppointmentAdapterPort, times(2)).save(appointment);
         verify(saveXRayReportAdapterPort).save(any(XRayReport.class));

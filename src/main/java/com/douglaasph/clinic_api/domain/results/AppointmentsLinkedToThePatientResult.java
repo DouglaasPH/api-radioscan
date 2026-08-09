@@ -69,11 +69,11 @@ public class AppointmentsLinkedToThePatientResult {
         this.dateHour = dateHour;
     }
 
-    public Long getxRayReportId() {
+    public Long getXRayReportId() {
         return xRayReportId;
     }
 
-    public void setxRayReportId(Long xRayReportId) {
+    public void setXRayReportId(Long xRayReportId) {
         this.xRayReportId = xRayReportId;
     }
 

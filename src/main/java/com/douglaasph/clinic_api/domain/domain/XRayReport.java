@@ -1,7 +1,5 @@
 package com.douglaasph.clinic_api.domain.domain;
 
-import com.douglaasph.clinic_api.adapter.outbound.repository.xrayreport.XRayReportJpaEntity;
-
 import java.time.Instant;
 import java.util.List;
 

@@ -7,10 +7,7 @@ import com.douglaasph.clinic_api.domain.domain.XRayReport;
 import com.douglaasph.clinic_api.domain.domain.enums.AppointmentStatus;
 import com.douglaasph.clinic_api.domain.domain.enums.AppointmentType;
 import com.douglaasph.clinic_api.domain.ports.inbound.BookReportReviewUseCasePort;
-import com.douglaasph.clinic_api.domain.ports.outbound.GetAppointmentByIdAdapterPort;
-import com.douglaasph.clinic_api.domain.ports.outbound.GetUserByEmailAdapterPort;
-import com.douglaasph.clinic_api.domain.ports.outbound.GetXRayReportByIdAdapterPort;
-import com.douglaasph.clinic_api.domain.ports.outbound.SaveAppointmentAdapterPort;
+import com.douglaasph.clinic_api.domain.ports.outbound.*;
 import com.douglaasph.clinic_api.exceptions.AppointmentConflictException;
 import com.douglaasph.clinic_api.exceptions.BusinessRuleException;
 import com.douglaasph.clinic_api.exceptions.ResourceNotFoundException;
@@ -22,12 +19,14 @@ public class BookReportReviewUseCase implements BookReportReviewUseCasePort {
     private final GetAppointmentByIdAdapterPort getAppointmentByIdAdapterPort;
     private final GetUserByEmailAdapterPort getUserByEmailAdapterPort;
     private final GetXRayReportByIdAdapterPort getXRayReportByIdAdapterPort;
+    private final SaveXRayReportAdapterPort saveXRayReportAdapterPort;
 
-    public BookReportReviewUseCase(SaveAppointmentAdapterPort saveAppointmentAdapterPort, GetAppointmentByIdAdapterPort getAppointmentByIdAdapterPort, GetUserByEmailAdapterPort getUserByEmailAdapterPort, GetXRayReportByIdAdapterPort getXRayReportByIdAdapterPort) {
+    public BookReportReviewUseCase(SaveAppointmentAdapterPort saveAppointmentAdapterPort, GetAppointmentByIdAdapterPort getAppointmentByIdAdapterPort, GetUserByEmailAdapterPort getUserByEmailAdapterPort, GetXRayReportByIdAdapterPort getXRayReportByIdAdapterPort, SaveXRayReportAdapterPort saveXRayReportAdapterPort) {
         this.saveAppointmentAdapterPort = saveAppointmentAdapterPort;
         this.getAppointmentByIdAdapterPort = getAppointmentByIdAdapterPort;
         this.getUserByEmailAdapterPort = getUserByEmailAdapterPort;
         this.getXRayReportByIdAdapterPort = getXRayReportByIdAdapterPort;
+        this.saveXRayReportAdapterPort = saveXRayReportAdapterPort;
     }
 
     @Override
@@ -57,12 +56,11 @@ public class BookReportReviewUseCase implements BookReportReviewUseCasePort {
 
         XRayReport xRayReport = getXRayReportByIdAdapterPort.get(xRayReportId)
                 .orElseThrow(() -> new ResourceNotFoundException("XRayReport", "id", xRayReportId));
-
         xRayReport.setProcessingStatus(3); // AWAITING_VALIDATION_BY_DOCTOR
-        appointment.setxRayReport(xRayReport);
+        appointment.setXRayReport(xRayReport);
         appointment.setPatient(patient);
         appointment.setStatus(AppointmentStatus.SCHEDULED);
-
+        saveXRayReportAdapterPort.save(xRayReport);
         return saveAppointmentAdapterPort.save(appointment);
     }
 }

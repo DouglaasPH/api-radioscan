@@ -121,13 +121,12 @@ public class SaveXRayReportAdapterTest {
                 null,
                 null,
                 false,
-                List.of(appointmentDomain)
+                List.of()
         );
 
         XRayReport result = saveXRayReportAdapter.save(report);
 
-        assertThat(result.getAppointment()).hasSize(1);
-        assertThat(result.getAppointment().get(0).getId()).isEqualTo(appointmentEntity.getId());
+        assertThat(result.getAppointment()).hasSize(0);
     }
 
     @Test
